@@ -1,0 +1,1857 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>気象マスター 第27回 - 単元攻略RPG</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: linear-gradient(180deg, #b8e4ff 0%, #dff1ff 40%, #f5faff 100%);
+    color: #1a2a4a;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  .sky-bg {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background:
+      radial-gradient(ellipse at 80% 10%, rgba(255,230,150,0.4) 0%, transparent 50%),
+      radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.6) 0%, transparent 40%);
+    z-index: -2;
+    pointer-events: none;
+  }
+  .rainbow-arc {
+    position: fixed;
+    top: 50px; right: -100px;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    border: 12px solid;
+    border-color:
+      rgba(255,100,100,0.15)
+      rgba(255,200,80,0.15)
+      rgba(255,230,100,0.15)
+      rgba(100,200,120,0.15);
+    box-shadow:
+      inset 0 0 0 6px rgba(100,180,220,0.15),
+      inset 0 0 0 12px rgba(150,100,200,0.12);
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.8;
+  }
+  .cloud {
+    position: fixed;
+    background: rgba(255,255,255,0.7);
+    border-radius: 50%;
+    filter: blur(2px);
+    z-index: -1;
+    pointer-events: none;
+    animation: drift var(--dur, 60s) linear infinite;
+  }
+  @keyframes drift {
+    from { transform: translateX(-150px); }
+    to { transform: translateX(calc(100vw + 150px)); }
+  }
+
+  /* ===== HEADER ===== */
+  .game-header {
+    background: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.7));
+    backdrop-filter: blur(10px);
+    border-bottom: 2px solid rgba(100,180,220,0.3);
+    padding: 12px 16px;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 10px rgba(100,180,220,0.15);
+  }
+  .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .game-title {
+    font-size: 1.1em; font-weight: 900;
+    background: linear-gradient(90deg, #ff5e5e, #ff9933, #ffcc33, #4abf4a, #3c8cdb, #a066d6);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 0.03em;
+  }
+  .lv-badge {
+    background: linear-gradient(135deg, #ff9a56, #ff6b6b);
+    color: #fff; font-weight: 900; font-size: 0.85em;
+    padding: 3px 12px; border-radius: 20px;
+    box-shadow: 0 2px 6px rgba(255,107,107,0.3);
+  }
+  .xp-bar-outer {
+    width: 100%; height: 10px;
+    background: rgba(255,255,255,0.8);
+    border: 1px solid rgba(100,180,220,0.2);
+    border-radius: 5px; overflow: hidden;
+  }
+  .xp-bar-inner {
+    height: 100%; border-radius: 5px;
+    background: linear-gradient(90deg, #ff5e5e, #ff9933, #ffcc33, #4abf4a, #3c8cdb, #a066d6);
+    transition: width 0.6s ease;
+  }
+  .xp-text { text-align: right; font-size: 0.7em; color: #4a6a8a; margin-top: 2px; font-weight: 700; }
+
+  /* ===== NAV ===== */
+  .nav-bar {
+    display: flex;
+    background: rgba(255,255,255,0.7);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid rgba(100,180,220,0.2);
+    overflow-x: auto;
+  }
+  .nav-btn {
+    flex: 1; min-width: 60px;
+    padding: 10px 4px; text-align: center;
+    background: none; border: none;
+    color: #6a8aaa;
+    font-size: 0.7em; font-weight: 700;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .nav-btn .nav-icon { font-size: 1.3em; display: block; margin-bottom: 2px; }
+  .nav-btn.active {
+    color: #3c8cdb;
+    border-bottom-color: #3c8cdb;
+    background: rgba(60,140,219,0.08);
+  }
+
+  /* ===== TABS ===== */
+  .tab { display: none; padding: 16px; max-width: 600px; margin: 0 auto; }
+  .tab.active { display: block; }
+
+  .section-title {
+    font-size: 1em; font-weight: 900;
+    color: #3c8cdb;
+    margin: 20px 0 12px;
+    padding-left: 12px;
+    border-left: 4px solid;
+    border-image: linear-gradient(180deg, #ff5e5e, #ffcc33, #4abf4a, #3c8cdb, #a066d6) 1;
+    letter-spacing: 0.05em;
+  }
+  .section-title:first-child { margin-top: 8px; }
+
+  /* ===== TAB 0: OVERVIEW ===== */
+  .overview-hero {
+    background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(200,230,255,0.6));
+    border: 2px solid rgba(100,180,220,0.3);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 20px rgba(100,180,220,0.15);
+  }
+  .overview-hero h2 {
+    font-size: 1.1em; color: #1a4a7a; margin-bottom: 10px; font-weight: 900;
+  }
+  .overview-hero p { font-size: 0.88em; line-height: 1.8; color: #2a4a6a; }
+
+  .volume-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 8px; margin: 14px 0;
+  }
+  .volume-item {
+    background: rgba(255,255,255,0.8);
+    border: 1px solid rgba(100,180,220,0.25);
+    border-radius: 12px;
+    padding: 10px 6px; text-align: center;
+  }
+  .volume-item .vi-num {
+    font-size: 1.5em; font-weight: 900;
+    background: linear-gradient(90deg, #ff6b6b, #3c8cdb);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .volume-item .vi-label { font-size: 0.72em; color: #4a6a8a; font-weight: 700; margin-top: 2px; }
+
+  .split-card {
+    background: rgba(255,255,255,0.85);
+    border: 1.5px solid rgba(100,180,220,0.25);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .split-card h3 {
+    font-size: 0.95em; font-weight: 900;
+    color: #1a4a7a;
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .split-card h3 .icon {
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 8px;
+    font-size: 0.95em;
+  }
+  .cat-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 10px; margin-bottom: 6px;
+    background: rgba(255,255,255,0.7);
+    border-radius: 10px;
+    font-size: 0.85em;
+  }
+  .cat-row:last-child { margin-bottom: 0; }
+  .cat-badge {
+    font-size: 0.7em; font-weight: 900;
+    padding: 3px 9px; border-radius: 10px;
+    color: #fff; flex-shrink: 0;
+    min-width: 60px; text-align: center;
+  }
+  .cat-ankimi { background: #ff6b6b; }
+  .cat-keisan { background: #3c8cdb; }
+  .cat-yomi { background: #4abf4a; }
+  .cat-content { font-weight: 700; color: #2a4a6a; flex: 1; font-size: 0.88em; }
+  .cat-stages {
+    font-size: 0.72em; color: #6a8aaa;
+    background: rgba(100,180,220,0.15);
+    padding: 2px 8px; border-radius: 8px;
+    font-weight: 700;
+  }
+
+  .anki-list {
+    background: rgba(255,240,220,0.8);
+    border: 1.5px solid rgba(255,150,80,0.3);
+    border-radius: 14px;
+    padding: 14px;
+    margin-top: 10px;
+  }
+  .anki-list .al-title {
+    font-size: 0.88em; font-weight: 900;
+    color: #cc5500; margin-bottom: 8px;
+  }
+  .anki-list ul { list-style: none; padding: 0; }
+  .anki-list li {
+    font-size: 0.82em; padding: 5px 0;
+    border-bottom: 1px dashed rgba(255,150,80,0.25);
+    color: #4a2a10;
+  }
+  .anki-list li:last-child { border-bottom: none; }
+  .anki-list li::before { content: "📌 "; margin-right: 2px; }
+
+  /* ===== TAB 1: STAGE MAP ===== */
+  .dungeon-path { position: relative; padding: 0 10px; }
+  .dungeon-line {
+    position: absolute; left: 30px; top: 0; bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, #ff6b6b, #ffcc33, #4abf4a, #3c8cdb, #a066d6);
+    z-index: 0; border-radius: 2px;
+    opacity: 0.5;
+  }
+  .stage-node {
+    position: relative;
+    display: flex; align-items: flex-start; gap: 14px;
+    margin-bottom: 6px; z-index: 1; cursor: pointer;
+  }
+  .node-icon {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1em; flex-shrink: 0;
+    border: 3px solid;
+    transition: all 0.3s;
+    font-weight: 900;
+    background: #fff;
+  }
+  .node-icon.available {
+    border-color: #3c8cdb;
+    color: #3c8cdb;
+    box-shadow: 0 0 10px rgba(60,140,219,0.3);
+    animation: glow-pulse 2s ease-in-out infinite;
+  }
+  .node-icon.cleared {
+    background: linear-gradient(135deg, #4abf4a, #2a9030);
+    border-color: #4abf4a; color: #fff;
+  }
+  @keyframes glow-pulse {
+    0%,100% { box-shadow: 0 0 6px rgba(60,140,219,0.3); }
+    50% { box-shadow: 0 0 16px rgba(60,140,219,0.6); }
+  }
+  .node-body {
+    background: rgba(255,255,255,0.9);
+    border: 1.5px solid rgba(100,180,220,0.25);
+    border-radius: 12px; padding: 12px 14px; flex: 1;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(100,180,220,0.1);
+  }
+  .stage-node:hover .node-body {
+    border-color: rgba(60,140,219,0.5);
+    transform: translateY(-1px);
+  }
+  .node-body .n-title {
+    font-weight: 900; font-size: 0.95em; color: #1a4a7a;
+    display: flex; justify-content: space-between; align-items: center; gap: 6px;
+  }
+  .n-badges { display: flex; gap: 4px; flex-shrink: 0; flex-wrap: wrap; }
+  .n-page {
+    font-size: 0.66em;
+    color: #fff; font-weight: 700;
+    padding: 2px 7px; border-radius: 10px; white-space: nowrap;
+  }
+  .page-anki { background: #ff6b6b; }
+  .page-keisan { background: #3c8cdb; }
+  .page-yomi { background: #4abf4a; }
+  .page-base { background: #8aa0b0; }
+  .node-body .n-desc { font-size: 0.8em; color: #5a7a9a; margin-top: 4px; }
+  .node-body .n-keywords { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
+  .n-kw {
+    font-size: 0.68em;
+    background: rgba(100,180,220,0.15);
+    color: #3c8cdb;
+    padding: 2px 7px; border-radius: 8px;
+    font-weight: 700;
+  }
+  .node-detail {
+    display: none; margin-top: 10px; padding: 12px;
+    background: rgba(223,241,255,0.7);
+    border: 1px solid rgba(100,180,220,0.2);
+    border-radius: 8px; font-size: 0.85em; color: #2a4a6a; line-height: 1.8;
+  }
+  .node-detail .hint-label {
+    color: #3c8cdb; font-weight: 900; font-size: 0.9em; margin-bottom: 6px;
+  }
+  .node-detail strong { color: #cc5500; }
+  .stage-node.open .node-detail { display: block; }
+
+  .clear-btn {
+    display: none; margin-top: 10px; padding: 10px 20px; width: 100%;
+    border: none; border-radius: 10px;
+    font-size: 0.95em; font-weight: 900; cursor: pointer; font-family: inherit;
+    color: #fff;
+    background: linear-gradient(135deg, #3c8cdb, #2060a8);
+    box-shadow: 0 3px 10px rgba(60,140,219,0.3);
+    transition: all 0.15s;
+  }
+  .clear-btn:active { transform: scale(0.96); }
+  .stage-node.open .clear-btn { display: block; }
+  .stage-node.cleared-node .clear-btn {
+    background: linear-gradient(135deg, #4abf4a, #2a9030);
+    color: #fff; cursor: default; box-shadow: none;
+  }
+
+  /* ===== TAB 2: KNOWLEDGE CARDS ===== */
+  .card-grid { display: flex; flex-direction: column; gap: 12px; }
+  .k-card {
+    background: rgba(255,255,255,0.9);
+    border: 1.5px solid rgba(255,150,80,0.3);
+    border-radius: 14px; overflow: hidden;
+    transition: all 0.2s; cursor: pointer;
+    box-shadow: 0 2px 8px rgba(255,150,80,0.1);
+  }
+  .k-card:hover {
+    border-color: rgba(255,100,100,0.5);
+    transform: translateY(-1px);
+  }
+  .k-card-header {
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .k-card-icon {
+    font-size: 1.8em; width: 48px; height: 48px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(255,200,150,0.3), rgba(255,150,100,0.2));
+    flex-shrink: 0;
+  }
+  .k-card-info { flex: 1; }
+  .k-card-title { font-weight: 900; font-size: 0.95em; color: #1a4a7a; }
+  .k-card-sub { font-size: 0.75em; color: #6a8aaa; margin-top: 2px; }
+  .k-card-body {
+    display: none; padding: 0 16px 16px;
+    font-size: 0.85em; line-height: 1.9; color: #2a4a6a;
+  }
+  .k-card.open .k-card-body { display: block; }
+  .k-card-body strong { color: #cc5500; }
+  .k-card-body .formula-box {
+    background: linear-gradient(135deg, rgba(255,240,180,0.6), rgba(255,220,100,0.3));
+    border: 1.5px solid rgba(255,180,40,0.4);
+    border-radius: 10px; padding: 10px 14px;
+    margin: 8px 0; font-size: 0.95em;
+    color: #5a3a00;
+  }
+  .k-card-body .warn-box {
+    background: rgba(255,200,200,0.5);
+    border: 1.5px solid rgba(255,80,80,0.35);
+    border-radius: 10px; padding: 10px 14px;
+    margin: 8px 0; color: #a02020;
+  }
+  .k-card-body .tip-box {
+    background: rgba(200,240,200,0.5);
+    border: 1.5px solid rgba(80,180,80,0.35);
+    border-radius: 10px; padding: 10px 14px;
+    margin: 8px 0; color: #206020;
+  }
+  .k-card-body table {
+    width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 0.82em;
+    background: #fff; border-radius: 8px; overflow: hidden;
+  }
+  .k-card-body th, .k-card-body td {
+    border: 1px solid rgba(100,180,220,0.2);
+    padding: 5px 6px; text-align: center;
+  }
+  .k-card-body th {
+    background: linear-gradient(135deg, #3c8cdb, #2060a8);
+    color: #fff; font-weight: 700;
+  }
+
+  /* ===== QUIZ / BOSS ===== */
+  .battle-arena { text-align: center; padding: 10px 0; }
+  .enemy-area { margin-bottom: 16px; }
+  .enemy-sprite {
+    font-size: 4em; line-height: 1;
+    filter: drop-shadow(0 4px 15px rgba(60,140,219,0.4));
+    transition: all 0.3s;
+  }
+  .enemy-sprite.hit { animation: enemy-hit 0.4s ease; }
+  @keyframes enemy-hit {
+    0% { transform: scale(1); }
+    25% { transform: scale(0.85) rotate(-5deg); filter: brightness(2); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+  .enemy-name { font-weight: 900; font-size: 1em; color: #cc3333; margin-top: 6px; }
+  .enemy-hp-bar {
+    width: 70%; height: 10px; margin: 8px auto;
+    background: rgba(255,255,255,0.8);
+    border: 1px solid rgba(255,100,100,0.3);
+    border-radius: 5px; overflow: hidden;
+  }
+  .enemy-hp-inner {
+    height: 100%; border-radius: 5px;
+    background: linear-gradient(90deg, #ff4444, #ff8888);
+    transition: width 0.4s ease;
+  }
+  .q-category {
+    font-size: 0.72em; color: #4a6a8a; font-weight: 700;
+    background: rgba(100,180,220,0.15);
+    display: inline-block; padding: 3px 12px; border-radius: 12px;
+    margin-bottom: 10px;
+  }
+  .q-text {
+    font-size: 0.95em; font-weight: 700; line-height: 1.7;
+    margin-bottom: 16px; text-align: left;
+    padding: 0 8px; color: #1a2a4a;
+  }
+  .q-options { display: flex; flex-direction: column; gap: 8px; padding: 0 4px; }
+  .q-opt {
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.95);
+    border: 2px solid rgba(100,180,220,0.3);
+    border-radius: 12px;
+    font-size: 0.9em; font-weight: 700;
+    cursor: pointer; text-align: left;
+    transition: all 0.15s;
+    font-family: inherit; color: #2a4a6a;
+    box-shadow: 0 2px 5px rgba(100,180,220,0.08);
+  }
+  .q-opt:hover { background: #eaf4ff; border-color: #3c8cdb; }
+  .q-opt.correct { background: rgba(74,191,74,0.2); border-color: #4abf4a; color: #206020; }
+  .q-opt.wrong { background: rgba(255,100,100,0.2); border-color: #ff6666; color: #a02020; }
+  .q-opt.disabled { pointer-events: none; }
+  .q-explanation {
+    display: none;
+    margin-top: 14px; padding: 14px;
+    background: rgba(255,240,220,0.9);
+    border: 1.5px solid rgba(255,150,80,0.35);
+    border-radius: 12px;
+    text-align: left; font-size: 0.85em; line-height: 1.8; color: #4a2a10;
+  }
+  .q-explanation strong { color: #cc5500; }
+  .q-next-btn {
+    display: none; margin-top: 14px;
+    padding: 12px 32px;
+    border: none; border-radius: 12px;
+    font-size: 1em; font-weight: 900;
+    cursor: pointer; font-family: inherit;
+    color: #fff;
+    background: linear-gradient(135deg, #3c8cdb, #2060a8);
+    box-shadow: 0 3px 12px rgba(60,140,219,0.3);
+  }
+
+  .boss-intro { text-align: center; padding: 20px 0; }
+  .boss-sprite { font-size: 5em; margin-bottom: 10px; }
+  .boss-title { font-size: 1.2em; font-weight: 900; color: #cc3333; }
+  .boss-desc { font-size: 0.85em; color: #5a6a8a; margin-top: 6px; padding: 0 20px; line-height: 1.7; }
+  .boss-start-btn {
+    margin-top: 20px; padding: 14px 40px;
+    border: none; border-radius: 14px;
+    font-size: 1.1em; font-weight: 900;
+    cursor: pointer; font-family: inherit;
+    color: #fff;
+    background: linear-gradient(135deg, #ff5e5e, #cc3333);
+    box-shadow: 0 4px 15px rgba(255,80,80,0.35);
+  }
+  .boss-result { display: none; text-align: center; padding: 20px; }
+  .boss-result .result-icon { font-size: 4em; margin-bottom: 10px; }
+  .boss-result .result-text { font-size: 1.1em; font-weight: 900; color: #1a4a7a; }
+  .boss-result .result-score { font-size: 2em; font-weight: 900; color: #cc5500; margin: 10px 0; }
+
+  /* ===== SCHEDULE ===== */
+  .schedule-day {
+    background: rgba(255,255,255,0.9);
+    border: 1.5px solid rgba(100,180,220,0.3);
+    border-radius: 16px;
+    margin-bottom: 14px; overflow: hidden;
+    transition: all 0.2s;
+    box-shadow: 0 2px 10px rgba(100,180,220,0.1);
+  }
+  .day-header {
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 12px;
+    cursor: pointer;
+  }
+  .day-num {
+    width: 44px; height: 44px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 1.1em;
+    flex-shrink: 0;
+    border: 3px solid;
+    background: #fff;
+  }
+  .day-num.day-pending { border-color: #bbb; color: #999; }
+  .day-num.day-active {
+    border-color: #3c8cdb; color: #3c8cdb;
+    animation: glow-pulse 2s ease-in-out infinite;
+  }
+  .day-num.day-done {
+    background: linear-gradient(135deg, #4abf4a, #2a9030);
+    border-color: #4abf4a; color: #fff;
+  }
+  .day-info { flex: 1; }
+  .day-title { font-weight: 900; font-size: 0.95em; color: #1a4a7a; }
+  .day-subtitle { font-size: 0.75em; color: #6a8aaa; margin-top: 2px; }
+  .day-time {
+    font-size: 0.7em; color: #3c8cdb;
+    background: rgba(60,140,219,0.12);
+    padding: 3px 10px; border-radius: 10px;
+    font-weight: 700;
+  }
+  .day-body { display: none; padding: 0 16px 16px; }
+  .schedule-day.open .day-body { display: block; }
+
+  .task-group { margin-bottom: 14px; }
+  .task-group-title {
+    font-size: 0.8em; font-weight: 900; color: #cc5500;
+    margin-bottom: 8px;
+    padding: 4px 12px;
+    background: linear-gradient(90deg, rgba(255,200,100,0.25), rgba(255,180,120,0.15));
+    border-radius: 8px;
+    display: inline-block;
+  }
+  .task-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px dashed rgba(100,180,220,0.2);
+    font-size: 0.85em; line-height: 1.6;
+  }
+  .task-item:last-child { border-bottom: none; }
+  .task-check {
+    width: 22px; height: 22px;
+    border: 2px solid rgba(100,180,220,0.5);
+    border-radius: 6px;
+    flex-shrink: 0; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    margin-top: 2px;
+    background: #fff;
+  }
+  .task-check.checked {
+    background: linear-gradient(135deg, #4abf4a, #2a9030);
+    border-color: #4abf4a;
+    color: #fff; font-size: 0.72em;
+  }
+  .task-check.checked::after { content: "\2713"; }
+  .task-text { flex: 1; color: #2a4a6a; }
+  .task-text.done { text-decoration: line-through; color: #aaa; }
+  .task-detail { font-size: 0.8em; color: #6a8aaa; margin-top: 2px; }
+  .task-tag {
+    display: inline-block;
+    font-size: 0.7em; font-weight: 700;
+    padding: 2px 8px; border-radius: 8px;
+    margin-right: 4px;
+    color: #fff;
+  }
+  .tag-read { background: #3c8cdb; }
+  .tag-write { background: #ff9933; }
+  .tag-quiz { background: #a066d6; }
+  .tag-review { background: #4abf4a; }
+  .tag-boss { background: #cc3333; }
+  .tag-ankimi { background: #ff6b6b; }
+
+  .day-complete-btn {
+    display: block; width: 100%;
+    margin-top: 12px; padding: 12px;
+    border: none; border-radius: 12px;
+    font-size: 0.95em; font-weight: 900;
+    cursor: pointer; font-family: inherit;
+    color: #fff;
+    background: linear-gradient(135deg, #3c8cdb, #2060a8);
+    box-shadow: 0 3px 10px rgba(60,140,219,0.3);
+    transition: all 0.15s;
+  }
+  .day-complete-btn:active { transform: scale(0.96); }
+  .day-complete-btn.completed {
+    background: linear-gradient(135deg, #4abf4a, #2a9030);
+  }
+  .schedule-progress {
+    background: rgba(255,255,255,0.9);
+    border: 1.5px solid rgba(100,180,220,0.3);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 16px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(100,180,220,0.1);
+  }
+  .sp-title { font-weight: 900; font-size: 0.9em; margin-bottom: 8px; color: #1a4a7a; }
+  .sp-bar-outer {
+    width: 100%; height: 12px;
+    background: rgba(100,180,220,0.12);
+    border-radius: 6px; overflow: hidden;
+    margin-bottom: 6px;
+  }
+  .sp-bar-inner {
+    height: 100%; border-radius: 6px;
+    background: linear-gradient(90deg, #ff6b6b, #ffcc33, #4abf4a, #3c8cdb, #a066d6);
+    transition: width 0.6s ease;
+  }
+  .sp-text { font-size: 0.75em; color: #3c8cdb; font-weight: 700; }
+
+  @media (max-width: 400px) {
+    .game-title { font-size: 0.95em; }
+    .q-text { font-size: 0.88em; }
+    .k-card-body table { font-size: 0.72em; }
+    .volume-grid { grid-template-columns: repeat(3, 1fr); }
+    .volume-item .vi-num { font-size: 1.3em; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sky-bg"></div>
+<div class="rainbow-arc"></div>
+
+<div class="game-header">
+  <div class="header-top">
+    <div class="game-title">&#x1F308; 気象マスター 第27回</div>
+    <div class="lv-badge" id="lvBadge">Lv.1</div>
+  </div>
+  <div class="xp-bar-outer"><div class="xp-bar-inner" id="xpBar" style="width:0%"></div></div>
+  <div class="xp-text" id="xpText">0 / 100 XP</div>
+</div>
+
+<div class="nav-bar">
+  <button class="nav-btn active" onclick="showTab(0)">
+    <span class="nav-icon">&#x1F9ED;</span>全体像
+  </button>
+  <button class="nav-btn" onclick="showTab(1)">
+    <span class="nav-icon">&#x1F5FA;</span>攻略マップ
+  </button>
+  <button class="nav-btn" onclick="showTab(2)">
+    <span class="nav-icon">&#x1F4D6;</span>暗記カード
+  </button>
+  <button class="nav-btn" onclick="showTab(3)">
+    <span class="nav-icon">&#x2694;</span>クイズ
+  </button>
+  <button class="nav-btn" onclick="showTab(4)">
+    <span class="nav-icon">&#x1F300;</span>ボス戦
+  </button>
+  <button class="nav-btn" onclick="showTab(5)">
+    <span class="nav-icon">&#x1F4C5;</span>5日攻略
+  </button>
+</div>
+
+<!-- ===== TAB 0: OVERVIEW ===== -->
+<div class="tab active" id="tab0">
+
+  <div class="overview-hero">
+    <h2>&#x1F308; この単元はコレ</h2>
+    <p>
+      第27回「気象」は<strong>日本の天気のしくみ</strong>がぜんぶ入った大単元。
+      気温・湿度・風・季節の天気・台風・前線まで盛りだくさん。
+      まず<strong>「どこに何があるか」</strong>と<strong>「暗記 / 計算 / 読み取り」のどれか</strong>
+      を把握してから攻略すると、ムダがないよ！
+    </p>
+  </div>
+
+  <div class="section-title">&#x1F4CA; 全体のボリューム</div>
+  <div class="volume-grid">
+    <div class="volume-item"><div class="vi-num">12</div><div class="vi-label">ステージ</div></div>
+    <div class="volume-item"><div class="vi-num">7</div><div class="vi-label">暗記カード</div></div>
+    <div class="volume-item"><div class="vi-num">30</div><div class="vi-label">クイズ</div></div>
+    <div class="volume-item"><div class="vi-num">10</div><div class="vi-label">ボス問題</div></div>
+    <div class="volume-item"><div class="vi-num">5</div><div class="vi-label">攻略日数</div></div>
+    <div class="volume-item"><div class="vi-num">約4h</div><div class="vi-label">総学習時間</div></div>
+  </div>
+
+  <div class="section-title">&#x1F4DA; 大分類①：内容で分けると</div>
+  <div class="split-card">
+    <h3><span class="icon">&#x1F321;</span>A. 気温と湿度（身の回り）</h3>
+    <div class="cat-row">
+      <span class="cat-badge cat-yomi">読取り</span>
+      <span class="cat-content">1日の気温・地温変化のグラフ</span>
+      <span class="cat-stages">Stg 1</span>
+    </div>
+    <div class="cat-row">
+      <span class="cat-badge cat-keisan">計算</span>
+      <span class="cat-content">飽和水蒸気量と湿度の計算</span>
+      <span class="cat-stages">Stg 2</span>
+    </div>
+    <div class="cat-row">
+      <span class="cat-badge cat-yomi">読取り</span>
+      <span class="cat-content">乾湿球湿度計（湿度表）</span>
+      <span class="cat-stages">Stg 3</span>
+    </div>
+  </div>
+
+  <div class="split-card">
+    <h3><span class="icon">&#x1F32C;</span>B. 風と大気（大きな動き）</h3>
+    <div class="cat-row">
+      <span class="cat-badge cat-keisan">計算</span>
+      <span class="cat-content">フェーン現象（100m＝1℃／0.5℃）</span>
+      <span class="cat-stages">Stg 4</span>
+    </div>
+    <div class="cat-row">
+      <span class="cat-badge cat-ankimi">暗記</span>
+      <span class="cat-content">海風・陸風・なぎ</span>
+      <span class="cat-stages">Stg 5</span>
+    </div>
+    <div class="cat-row">
+      <span class="cat-badge cat-ankimi">暗記</span>
+      <span class="cat-content">季節風と偏西風</span>
+      <span class="cat-stages">Stg 6</span>
+    </div>
+  </div>
+
+  <div class="split-card">
+    <h3><span class="icon">&#x1F5FE;</span>C. 日本の季節と天気</h3>
+    <div class="cat-row">
+      <span class="cat-badge cat-ankimi">暗記</span>
+      <span class="cat-content">4つの気団と気圧配置</span>
+      <span class="cat-stages">Stg 7</span>
+    </div>
+    <div class="cat-row">
+      <span class="cat-badge cat-yomi">読取り</span>
+      <span class="cat-content">四季の天気（雲画像・天気図）</span>
+      <span class="cat-stages">Stg 8</span>
+    </div>
+    <div class="cat-row">
+      <span class="cat-badge cat-ankimi">暗記</span>
+      <span class="cat-content">台風のしくみ</span>
+      <span class="cat-stages">Stg 9</span>
+    </div>
+    <div class="cat-row">
+      <span class="cat-badge cat-ankimi">暗記</span>
+      <span class="cat-content">前線・高気圧・低気圧</span>
+      <span class="cat-stages">Stg 10</span>
+    </div>
+  </div>
+
+  <div class="split-card">
+    <h3><span class="icon">&#x1F4E1;</span>D. 観測のしくみ</h3>
+    <div class="cat-row">
+      <span class="cat-badge cat-ankimi">暗記</span>
+      <span class="cat-content">百葉箱・アメダス・気象衛星</span>
+      <span class="cat-stages">Stg 11</span>
+    </div>
+    <div class="cat-row">
+      <span class="cat-badge cat-yomi">読取り</span>
+      <span class="cat-content">ひっかけポイント集</span>
+      <span class="cat-stages">Stg 12</span>
+    </div>
+  </div>
+
+  <div class="section-title">&#x1F3AF; 大分類②：やることで分けると</div>
+  <div class="split-card">
+    <h3><span class="icon" style="background:#ffe4e4">&#x1F4DA;</span>暗記系（覚えるしかない）</h3>
+    <div class="cat-row"><span class="cat-content">気団4つの性質／海陸風・季節風の向き／台風の定義／百葉箱の条件／前線記号／気圧配置の名前</span></div>
+    <div style="font-size:0.75em;color:#6a8aaa;margin-top:6px">&#x2192; <strong>暗記カード</strong>タブに全部入ってる。書いて覚える！</div>
+  </div>
+  <div class="split-card">
+    <h3><span class="icon" style="background:#d4e8f8">&#x1F9EE;</span>計算系（公式と手順）</h3>
+    <div class="cat-row"><span class="cat-content">湿度の計算（湿度公式）／結露量／フェーン現象（100m＝1℃／0.5℃）</span></div>
+    <div style="font-size:0.75em;color:#6a8aaa;margin-top:6px">&#x2192; Stage 2・Stage 4。<strong>解き方の手順</strong>を体で覚える</div>
+  </div>
+  <div class="split-card">
+    <h3><span class="icon" style="background:#d4f4d4">&#x1F441;</span>読み取り系（図・グラフ・表）</h3>
+    <div class="cat-row"><span class="cat-content">気温グラフ／湿度表／雲画像／天気図／気圧配置の判定</span></div>
+    <div style="font-size:0.75em;color:#6a8aaa;margin-top:6px">&#x2192; <strong>典型パターン</strong>を覚えれば秒で解ける</div>
+  </div>
+
+  <div class="anki-list">
+    <div class="al-title">&#x1F525; 必ず暗記するもの リスト（これだけは完璧に！）</div>
+    <ul>
+      <li>気温の最高は<strong>午後2時ごろ</strong>・地温の最高は<strong>正午過ぎ</strong></li>
+      <li>湿度＝実際の水蒸気量 ÷ 飽和水蒸気量 × 100</li>
+      <li>フェーン：上昇100m＝1℃↓（雲後は0.5℃）／下降100m＝1℃↑</li>
+      <li>昼＝<strong>海風</strong>（海→陸）／夜＝<strong>陸風</strong>（陸→海）／朝夕＝<strong>なぎ</strong></li>
+      <li>夏＝<strong>南東</strong>の季節風／冬＝<strong>北西</strong>の季節風／偏西風＝<strong>西→東</strong></li>
+      <li>4気団：<strong>シベリア</strong>（冷・乾）／<strong>オホーツク</strong>（冷・湿）／<strong>小笠原</strong>（暖・湿）／<strong>揚子江</strong>（暖・乾）</li>
+      <li>気圧配置：夏＝<strong>南高北低</strong>／冬＝<strong>西高東低</strong></li>
+      <li>台風＝熱帯低気圧のうち最大風速<strong>秒速17.2m以上</strong>／<strong>反時計回り</strong>／進行方向の<strong>右</strong>が強風</li>
+      <li>温暖前線＝半円●／弱い雨・長時間／<strong>乱層雲</strong></li>
+      <li>寒冷前線＝三角▲／強い雨・短時間／<strong>積乱雲（入道雲）</strong></li>
+      <li>百葉箱：<strong>白・北向き扉・芝生の上・地上1.2〜1.5m</strong></li>
+      <li>アメダス＝全国<strong>約1300箇所</strong>／日本の気象衛星＝<strong>ひまわり</strong></li>
+    </ul>
+  </div>
+
+  <div class="section-title">&#x1F680; さぁ、始めよう！</div>
+  <div class="split-card" style="text-align:center;cursor:pointer" onclick="showTab(5)">
+    <div style="font-size:0.9em;font-weight:900;color:#1a4a7a">&#x1F4C5; 「5日攻略」タブ</div>
+    <div style="font-size:0.8em;color:#6a8aaa;margin-top:4px">Day 1から順番にこなせばOK。1日40〜50分でゴール！</div>
+  </div>
+</div>
+
+<!-- ===== TAB 1: STAGE MAP ===== -->
+<div class="tab" id="tab1">
+  <div class="section-title">&#x1F5FA; 攻略マップ（全12ステージ）</div>
+  <div style="font-size:0.8em;color:#5a7a9a;margin-bottom:14px;line-height:1.7">
+    タップして開く &#x2192; 知識を読む &#x2192; クリア！でXP獲得。<br>
+    タグの色：<span style="color:#ff6b6b;font-weight:900">●赤=暗記</span>
+    <span style="color:#3c8cdb;font-weight:900">●青=計算</span>
+    <span style="color:#4abf4a;font-weight:900">●緑=読取り</span>
+  </div>
+
+  <div class="dungeon-path">
+    <div class="dungeon-line"></div>
+
+    <div class="stage-node" onclick="toggleNode(this)">
+      <div class="node-icon available">1</div>
+      <div class="node-body">
+        <div class="n-title">気温と地温の1日の変化<span class="n-badges"><span class="n-page page-yomi">読取</span></span></div>
+        <div class="n-desc">晴れの日とくもりの日で気温変化はどう違う？</div>
+        <div class="n-keywords"><span class="n-kw">最高気温</span><span class="n-kw">地温</span><span class="n-kw">雲の働き</span></div>
+        <div class="node-detail">
+          <div class="hint-label">攻略ポイント</div>
+          ・太陽高度の最高＝<strong>正午（12時）</strong><br>
+          ・地温の最高＝<strong>午後1時ごろ</strong>（太陽の1時間後）<br>
+          ・気温の最高＝<strong>午後2時ごろ</strong>（地温の1時間後）<br>
+          ・<strong>気温は地面から伝わる熱であたたまる</strong>ので、太陽→地面→空気の順で遅れる<br><br>
+          <strong>晴れの日</strong>：気温の変化が大きい（昼は高温、夜は低温）<br>
+          <strong>くもりの日</strong>：気温の変化が小さい<br>
+          ・昼：雲が太陽光をさえぎるので気温が上がりにくい<br>
+          ・夜：雲が地面の熱を宇宙へ逃がさないので気温が下がりにくい
+        </div>
+        <button class="clear-btn" onclick="event.stopPropagation();clearStage(this)">クリア！</button>
+      </div>
+    </div>
+
+    <div class="stage-node" onclick="toggleNode(this)">
+      <div class="node-icon available">2</div>
+      <div class="node-body">
+        <div class="n-title">飽和水蒸気量と湿度<span class="n-badges"><span class="n-page page-keisan">計算</span></span></div>
+        <div class="n-desc">湿度公式と表の読み方</div>
+        <div class="n-keywords"><span class="n-kw">飽和水蒸気量</span><span class="n-kw">湿度</span><span class="n-kw">露点</span><span class="n-kw">結露</span></div>
+        <div class="node-detail">
+          <div class="hint-label">攻略ポイント ★最頻出★</div>
+          <strong>飽和水蒸気量</strong>＝1m³の空気がふくめる水蒸気の限界量（g/m³）<br>
+          気温が高いほど飽和水蒸気量は大きい<br><br>
+          <strong>湿度の公式（絶対暗記）</strong><br>
+          湿度(%)＝<strong>（実際の水蒸気量 ÷ その気温の飽和水蒸気量）× 100</strong><br><br>
+          <strong>露点</strong>＝湿度100%になる気温（＝水てきが出始める気温）<br>
+          結露量 ＝ 実際の水蒸気量 − 下げた温度の飽和水蒸気量<br><br>
+          気温↑ → 飽和水蒸気量↑ → 湿度↓<br>
+          気温↓ → 飽和水蒸気量↓ → 湿度↑ → 露点で結露
+        </div>
+        <button class="clear-btn" onclick="event.stopPropagation();clearStage(this)">クリア！</button>
+      </div>
+    </div>
+
+    <div class="stage-node" onclick="toggleNode(this)">
+      <div class="node-icon available">3</div>
+      <div class="node-body">
+        <div class="n-title">乾湿球湿度計<span class="n-badges"><span class="n-page page-yomi">読取</span></span></div>
+        <div class="n-desc">湿球はなぜ乾球より温度が低い？</div>
+        <div class="n-keywords"><span class="n-kw">乾球</span><span class="n-kw">湿球</span><span class="n-kw">気化熱</span><span class="n-kw">湿度表</span></div>
+        <div class="node-detail">
+          <div class="hint-label">攻略ポイント</div>
+          ・<strong>乾球</strong>＝そのままの気温<br>
+          ・<strong>湿球</strong>＝ガーゼが水にぬれている。水が蒸発するとき<strong>まわりから熱をうばう</strong>ので、乾球より温度が低くなる<br><br>
+          <strong>湿度が低い</strong>（乾燥）→ 蒸発が多い → 差が<strong>大きい</strong><br>
+          <strong>湿度が高い</strong>（多湿）→ 蒸発が少ない → 差が<strong>小さい</strong><br>
+          <strong>湿度100%</strong> → 乾球＝湿球（差0）<br><br>
+          <strong>湿度表の読み方</strong>：縦＝乾球温度／横＝差（乾球−湿球）<br>
+          例：乾球21℃、湿球18℃ → 差3℃ → 湿度73%
+        </div>
+        <button class="clear-btn" onclick="event.stopPropagation();clearStage(this)">クリア！</button>
+      </div>
+    </div>
+
+    <div class="stage-node" onclick="toggleNode(this)">
+      <div class="node-icon available">4</div>
+      <div class="node-body">
+        <div class="n-title">フェーン現象<span class="n-badges"><span class="n-page page-keisan">計算</span></span></div>
+        <div class="n-desc">山を越えると風下は高温で乾燥する</div>
+        <div class="n-keywords"><span class="n-kw">100m＝1℃</span><span class="n-kw">0.5℃</span><span class="n-kw">乾燥</span></div>
+        <div class="node-detail">
+          <div class="hint-label">攻略ポイント ★計算問題頻出★</div>
+          <strong>基本ルール</strong><br>
+          ・上昇100m＝<strong>1℃下がる</strong>（雲ができる前）<br>
+          ・雲ができてからは100mで<strong>0.5℃しか下がらない</strong>（水蒸気が水になるとき熱を出すから）<br>
+          ・下降100m＝<strong>1℃上がる</strong>（常に）<br><br>
+          <strong>手順</strong><br>
+          ①風上のふもと→雲の高さ：100mで1℃下がる<br>
+          ②雲の高さ→山頂：100mで0.5℃下がる<br>
+          ③山頂→風下ふもと：100mで1℃上がる<br><br>
+          <strong>結果</strong>：風下の温度＞風上の温度、乾燥
+        </div>
+        <button class="clear-btn" onclick="event.stopPropagation();clearStage(this)">クリア！</button>
+      </div>
+    </div>
+
+    <div class="stage-node" onclick="toggleNode(this)">
+      <div class="node-icon available">5</div>
+      <div class="node-body">
+        <div class="n-title">海風・陸風・なぎ<span class="n-badges"><span class="n-page page-anki">暗記</span></span></div>
+        <div class="n-desc">昼と夜で風の向きが逆になる理由</div>
+        <div class="n-keywords"><span class="n-kw">海風</span><span class="n-kw">陸風</span><span class="n-kw">なぎ</span></div>
+        <div class="node-detail">
+          <div class="hint-label">攻略ポイント</div>
+          <strong>基本原理</strong>：あたたまった空気が上昇 → そこへまわりの空気が流れ込む＝風<br>
+          ・陸は<strong>あたたまりやすく冷めやすい</strong><br>
+          ・海は<strong>あたたまりにくく冷めにくい</strong><br><br>
+          <strong>昼（晴れた日）</strong><br>
+          陸＞海 → 陸の空気が上昇 → <strong>海風（海→陸）</strong><br><br>
+          <strong>夜</strong><br>
+          海＞陸 → 海の空気が上昇 → <strong>陸風（陸→海）</strong><br><br>
+          <strong>なぎ</strong>：朝と夕方、地面と海面の温度が等しい → 風がやむ（朝凪・夕凪）
+        </div>
+        <button class="clear-btn" onclick="event.stopPropagation();clearStage(this)">クリア！</button>
+      </div>
+    </div>
+
+    <div class="stage-node" onclick="toggleNode(this)">
+      <div class="node-icon available">6</div>
+      <div class="node-body">
+        <div class="n-title">季節風と偏西風<span class="n-badges"><span class="n-page page-anki">暗記</span></span></div>
+        <div class="n-desc">海陸風の大規模版＝季節風</div>
+        <div class="n-keywords"><span class="n-kw">夏・南東</span><span class="n-kw">冬・北西</span><span class="n-kw">偏西風</span></div>
+        <div class="node-detail">
+          <div class="hint-label">攻略ポイント</div>
+          <strong>夏の季節風＝南東の風</strong>（太平洋→日本→大陸）<br>
+          大陸があたたまる→大陸上の空気が上昇→太平洋から南東の風<br>
+          小笠原気団（暖・湿）を運ぶ<br><br>
+          <strong>冬の季節風＝北西の風</strong>（シベリア→日本→太平洋）<br>
+          太平洋側があたたかい→太平洋上の空気が上昇→大陸から北西の風<br>
+          シベリア気団（冷・乾）を運ぶ<br><br>
+          <strong>偏西風</strong>＝上空で1年を通して<strong>西から東</strong>へふく風<br>
+          ・天気が西から東へ変わる／台風を北東へ流す
+        </div>
+        <button class="clear-btn" onclick="event.stopPropagation();clearStage(this)">クリア！</button>
+      </div>
+    </div>
+
+    <div class="stage-node" onclick="toggleNode(this)">
+      <div class="node-icon available">7</div>
+      <div class="node-body">
+        <div class="n-title">4つの気団と気圧配置<span class="n-badges"><span class="n-page page-anki">暗記</span></span></div>
+        <div class="n-desc">気団の性質は温度×湿度の2軸で覚える</div>
+        <div class="n-keywords"><span class="n-kw">シベリア</span><span class="n-kw">オホーツク</span><span class="n-kw">小笠原</span><span class="n-kw">揚子江</span></div>
+        <div class="node-detail">
+          <div class="hint-label">攻略ポイント</div>
+          <strong>4つの気団</strong>（温度×湿度）<br>
+          ・<strong>シベリア気団</strong>：冷・乾（北西／大陸）<br>
+          ・<strong>オホーツク海気団</strong>：冷・湿（北東／海）<br>
+          ・<strong>小笠原気団</strong>：暖・湿（南東／海）<br>
+          ・<strong>揚子江気団</strong>：暖・乾（南西／大陸）<br><br>
+          <strong>気団の性質を決めるルール</strong><br>
+          ・大陸の上でできる→乾いている／海の上でできる→湿っている<br>
+          ・北でできる→冷たい／南でできる→暖かい<br><br>
+          <strong>四季の気圧配置</strong><br>
+          ・春／秋：移動性高気圧と低気圧が交互（揚子江気団）<br>
+          ・梅雨：停滞前線（オホーツク vs 小笠原）<br>
+          ・夏：<strong>南高北低</strong>（小笠原強）<br>
+          ・冬：<strong>西高東低</strong>（シベリア強）
+        </div>
+        <button class="clear-btn" onclick="event.stopPropagation();clearStage(this)">クリア！</button>
+      </div>
+    </div>
+
+    <div class="stage-node" onclick="toggleNode(this)">
+      <div class="node-icon available">8</div>
+      <div class="node-body">
+        <div class="n-title">日本の四季の天気<span class="n-badges"><span class="n-page page-yomi">読取</span></span></div>
+        <div class="n-desc">雲画像と天気図から季節を判定</div>
+        <div class="n-keywords"><span class="n-kw">春</span><span class="n-kw">梅雨</span><span class="n-kw">夏</span><span class="n-kw">秋</span><span class="n-kw">冬</span></div>
+        <div class="node-detail">
+          <div class="hint-label">攻略ポイント</div>
+          <strong>春（4〜5月）</strong>：4〜5日周期で天気が変わる<br>
+          雲画像＝雲のかたまりが西から東へ移動<br><br>
+          <strong>梅雨（6月）</strong>：停滞前線<br>
+          雲画像＝東西にのびる帯状の雲／天気図＝横長の前線<br><br>
+          <strong>夏（7〜8月）</strong>：南高北低<br>
+          雲画像＝日本上空に雲が少ない／蒸し暑い／南東の季節風<br><br>
+          <strong>秋（9月）</strong>：台風・秋雨前線<br>
+          雲画像＝うずまき状の雲（台風）<br><br>
+          <strong>冬（12〜2月）</strong>：西高東低／北西の季節風<br>
+          雲画像＝<strong>日本海側にすじ状の雲</strong>（冬の特徴！）<br>
+          日本海側：雪、太平洋側：乾燥して晴れ
+        </div>
+        <button class="clear-btn" onclick="event.stopPropagation();clearStage(this)">クリア！</button>
+      </div>
+    </div>
+
+    <div class="stage-node" onclick="toggleNode(this)">
+      <div class="node-icon available">9</div>
+      <div class="node-body">
+        <div class="n-title">台風<span class="n-badges"><span class="n-page page-anki">暗記</span></span></div>
+        <div class="n-desc">定義・進路・風向変化</div>
+        <div class="n-keywords"><span class="n-kw">17.2m/s</span><span class="n-kw">反時計</span><span class="n-kw">右が強風</span></div>
+        <div class="node-detail">
+          <div class="hint-label">攻略ポイント</div>
+          <strong>定義</strong>：熱帯低気圧のうち最大風速が<strong>秒速17.2m以上</strong>／日本の南海上で発生<br><br>
+          <strong>進路</strong>：小笠原気団のふちにそって北上→北上後、偏西風で北東に流される<br><br>
+          <strong>風向の変化</strong>（北半球では<strong>反時計回り</strong>にふきこむ）<br>
+          ・台風が観測地点の<strong>東</strong>を通過：東→南→西<br>
+          ・台風が<strong>西</strong>を通過：東→北→西<br>
+          ・<strong>進行方向の右側</strong>＝台風風＋進む風が重なり<strong>強風</strong><br><br>
+          <strong>災害</strong>：大雨・洪水・暴風・<strong>高潮</strong>（※<strong>津波は地震</strong>による！ひっかけ）
+        </div>
+        <button class="clear-btn" onclick="event.stopPropagation();clearStage(this)">クリア！</button>
+      </div>
+    </div>
+
+    <div class="stage-node" onclick="toggleNode(this)">
+      <div class="node-icon available">10</div>
+      <div class="node-body">
+        <div class="n-title">前線と高気圧・低気圧<span class="n-badges"><span class="n-page page-anki">暗記</span></span></div>
+        <div class="n-desc">温暖／寒冷／停滞の見分け方</div>
+        <div class="n-keywords"><span class="n-kw">温暖</span><span class="n-kw">寒冷</span><span class="n-kw">停滞</span></div>
+        <div class="node-detail">
+          <div class="hint-label">攻略ポイント</div>
+          <strong>温暖前線</strong>（暖気が寒気に乗り上げる）<br>
+          記号：●●●（半円）／雲：<strong>乱層雲</strong>／<strong>弱い雨が長時間</strong>広範囲／通過後：気温↑、風は南寄り<br><br>
+          <strong>寒冷前線</strong>（寒気が暖気の下にもぐる）<br>
+          記号：▲▲▲（三角）／雲：<strong>積乱雲（入道雲）</strong>／<strong>強い雨が短時間</strong>せまい範囲／通過後：気温↓、風は北寄り<br><br>
+          <strong>停滞前線</strong>：梅雨前線・秋雨前線（勢力が同じで動かない）<br><br>
+          <strong>高気圧</strong>（北半球）：<strong>時計回りにふき出す</strong>・下降気流・晴れ<br>
+          <strong>低気圧</strong>（北半球）：<strong>反時計回りにふきこむ</strong>・上昇気流・雨
+        </div>
+        <button class="clear-btn" onclick="event.stopPropagation();clearStage(this)">クリア！</button>
+      </div>
+    </div>
+
+    <div class="stage-node" onclick="toggleNode(this)">
+      <div class="node-icon available">11</div>
+      <div class="node-body">
+        <div class="n-title">百葉箱・アメダス・気象衛星<span class="n-badges"><span class="n-page page-anki">暗記</span></span></div>
+        <div class="n-desc">観測の装置と条件</div>
+        <div class="n-keywords"><span class="n-kw">百葉箱</span><span class="n-kw">アメダス</span><span class="n-kw">ひまわり</span></div>
+        <div class="node-detail">
+          <div class="hint-label">攻略ポイント</div>
+          <strong>百葉箱</strong><br>
+          ・色：<strong>白</strong>（光を反射して温度上昇を防ぐ）<br>
+          ・扉の向き：<strong>北向き</strong>（直射日光が入らない）<br>
+          ・地面：<strong>芝生</strong>（地面からの熱反射を防ぐ）<br>
+          ・高さ：<strong>地上1.2〜1.5m</strong>／よろい戸で風通しよく<br><br>
+          <strong>アメダス（AMeDAS）</strong><br>
+          日本全国<strong>約1300箇所</strong>の自動気象観測システム<br>
+          降水量・風向・風速・気温などを自動観測<br><br>
+          <strong>気象衛星</strong><br>
+          日本の気象衛星＝<strong>ひまわり</strong>／人工衛星から雲を撮影
+        </div>
+        <button class="clear-btn" onclick="event.stopPropagation();clearStage(this)">クリア！</button>
+      </div>
+    </div>
+
+    <div class="stage-node" onclick="toggleNode(this)">
+      <div class="node-icon available">12</div>
+      <div class="node-body">
+        <div class="n-title">ひっかけポイント集<span class="n-badges"><span class="n-page page-base">直前</span></span></div>
+        <div class="n-desc">テスト直前に必ず確認！</div>
+        <div class="n-keywords"><span class="n-kw">要注意</span></div>
+        <div class="node-detail">
+          <div class="hint-label">攻略ポイント ★10個全部チェック★</div>
+          ①<strong>気温の最高は正午ではない</strong>→ 午後2時ごろ<br><br>
+          ②<strong>台風の災害に津波は入らない</strong>→ 津波は地震。台風は高潮<br><br>
+          ③<strong>台風は反時計回り</strong>（北半球）／進行方向の右が強風<br><br>
+          ④<strong>冬の雲＝日本海側のすじ状</strong>／太平洋側は晴れ<br><br>
+          ⑤<strong>フェーン計算</strong>：上昇は1℃か0.5℃、<strong>下降は常に1℃</strong><br><br>
+          ⑥<strong>湿度計算は「その温度の」飽和水蒸気量</strong>で割る<br><br>
+          ⑦<strong>乾湿球の差が大きい＝湿度が低い</strong><br><br>
+          ⑧<strong>百葉箱の扉は北向き</strong>／色は白／芝生の上<br><br>
+          ⑨<strong>温暖●半円・寒冷▲三角</strong>（記号逆にしない）<br><br>
+          ⑩<strong>高気圧＝時計回りにふき出す／低気圧＝反時計回りにふきこむ</strong>
+        </div>
+        <button class="clear-btn" onclick="event.stopPropagation();clearStage(this)">クリア！</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== TAB 2: KNOWLEDGE CARDS (暗記カード) ===== -->
+<div class="tab" id="tab2">
+  <div class="section-title">&#x1F4D6; 暗記カード（書いて覚えよう）</div>
+  <div style="font-size:0.8em;color:#5a7a9a;margin-bottom:14px;line-height:1.7">
+    ここは「<strong style="color:#cc5500">覚えるしかない</strong>」項目だけ集めたカード。<br>
+    タップして開く → ノートに書き写す → 閉じて口で言う → チェック！
+  </div>
+  <div class="card-grid">
+
+    <div class="k-card" onclick="this.classList.toggle('open')">
+      <div class="k-card-header">
+        <div class="k-card-icon">&#x2601;</div>
+        <div class="k-card-info">
+          <div class="k-card-title">4つの気団（テスト超頻出）</div>
+          <div class="k-card-sub">温度×湿度の2軸で即答できるように</div>
+        </div>
+      </div>
+      <div class="k-card-body">
+        <table>
+          <tr><th>気団</th><th>温度</th><th>湿度</th><th>位置</th><th>いつ強い？</th></tr>
+          <tr><td><strong>シベリア</strong></td><td>冷</td><td>乾</td><td>北西・大陸</td><td>冬</td></tr>
+          <tr><td><strong>オホーツク海</strong></td><td>冷</td><td>湿</td><td>北東・海</td><td>梅雨・秋雨</td></tr>
+          <tr><td><strong>小笠原</strong></td><td>暖</td><td>湿</td><td>南東・海</td><td>夏</td></tr>
+          <tr><td><strong>揚子江</strong></td><td>暖</td><td>乾</td><td>南西・大陸</td><td>春・秋</td></tr>
+        </table>
+        <div class="tip-box">
+          <strong>覚え方：</strong>「大陸＝乾、海＝湿」「北＝冷、南＝暖」の2つだけ覚えればOK！<br>
+          北の大陸＝シベリア（冷乾）／北の海＝オホーツク（冷湿）／南の海＝小笠原（暖湿）／南の大陸＝揚子江（暖乾）
+        </div>
+      </div>
+    </div>
+
+    <div class="k-card" onclick="this.classList.toggle('open')">
+      <div class="k-card-header">
+        <div class="k-card-icon">&#x1F5FE;</div>
+        <div class="k-card-info">
+          <div class="k-card-title">四季の気圧配置</div>
+          <div class="k-card-sub">漢字4文字セットで暗記</div>
+        </div>
+      </div>
+      <div class="k-card-body">
+        <table>
+          <tr><th>季節</th><th>気圧配置</th><th>特徴</th></tr>
+          <tr><td>春・秋</td><td>移動性高気圧</td><td>4〜5日周期で天気変化</td></tr>
+          <tr><td>梅雨</td><td>停滞前線（梅雨前線）</td><td>横長の前線が日本に</td></tr>
+          <tr><td><strong>夏</strong></td><td><strong>南高北低</strong></td><td>蒸し暑い・南東の風</td></tr>
+          <tr><td>秋</td><td>秋雨前線＋台風</td><td>うずまき雲</td></tr>
+          <tr><td><strong>冬</strong></td><td><strong>西高東低</strong></td><td>日本海すじ状雲・北西の風</td></tr>
+        </table>
+        <div class="formula-box">
+          <strong>夏＝南高北低　冬＝西高東低</strong><br>
+          この2つだけは絶対！
+        </div>
+      </div>
+    </div>
+
+    <div class="k-card" onclick="this.classList.toggle('open')">
+      <div class="k-card-header">
+        <div class="k-card-icon">&#x1F32C;</div>
+        <div class="k-card-info">
+          <div class="k-card-title">風の向きまとめ</div>
+          <div class="k-card-sub">海陸風・季節風・偏西風</div>
+        </div>
+      </div>
+      <div class="k-card-body">
+        <table>
+          <tr><th>風</th><th>いつ</th><th>向き</th></tr>
+          <tr><td><strong>海風</strong></td><td>昼（晴れ）</td><td>海→陸</td></tr>
+          <tr><td><strong>陸風</strong></td><td>夜</td><td>陸→海</td></tr>
+          <tr><td>なぎ</td><td>朝・夕</td><td>風がやむ</td></tr>
+          <tr><td><strong>夏の季節風</strong></td><td>夏</td><td><strong>南東</strong>（太平洋→大陸）</td></tr>
+          <tr><td><strong>冬の季節風</strong></td><td>冬</td><td><strong>北西</strong>（大陸→太平洋）</td></tr>
+          <tr><td><strong>偏西風</strong></td><td>1年中</td><td><strong>西→東</strong>（上空）</td></tr>
+        </table>
+        <div class="tip-box">
+          <strong>覚え方：</strong>あたたまりやすい側に空気が上がり、そこへ風が流れ込む。<br>
+          昼は陸があたたまる→海から風（海風）／夏は大陸があたたまる→太平洋から風（南東）
+        </div>
+      </div>
+    </div>
+
+    <div class="k-card" onclick="this.classList.toggle('open')">
+      <div class="k-card-header">
+        <div class="k-card-icon">&#x1F300;</div>
+        <div class="k-card-info">
+          <div class="k-card-title">台風の定義と性質</div>
+          <div class="k-card-sub">数字と向きを正確に</div>
+        </div>
+      </div>
+      <div class="k-card-body">
+        <div class="formula-box">
+          <strong>台風＝熱帯低気圧のうち、中心付近の最大風速が<span style="color:#cc0000">秒速17.2m以上</span>になったもの</strong>
+        </div>
+        ・発生：日本の<strong>南海上</strong><br>
+        ・風：<strong>反時計回り</strong>にふきこむ（北半球）<br>
+        ・進路：小笠原気団のふちを北上→偏西風で北東へ<br>
+        ・<strong>進行方向の右側</strong>＝強風<br><br>
+        <div class="warn-box">
+          <strong>災害（ひっかけ注意！）</strong><br>
+          ○ 大雨・洪水・暴風・<strong>高潮</strong><br>
+          × <strong>津波は地震が原因！</strong>台風ではない
+        </div>
+      </div>
+    </div>
+
+    <div class="k-card" onclick="this.classList.toggle('open')">
+      <div class="k-card-header">
+        <div class="k-card-icon">&#x2744;</div>
+        <div class="k-card-info">
+          <div class="k-card-title">前線の記号と雲</div>
+          <div class="k-card-sub">温暖・寒冷・停滞の3種類</div>
+        </div>
+      </div>
+      <div class="k-card-body">
+        <table>
+          <tr><th></th><th>温暖前線</th><th>寒冷前線</th></tr>
+          <tr><td>記号</td><td>●●●（半円）</td><td>▲▲▲（三角）</td></tr>
+          <tr><td>雲</td><td><strong>乱層雲</strong></td><td><strong>積乱雲（入道雲）</strong></td></tr>
+          <tr><td>雨</td><td>弱い・長時間</td><td>強い・短時間</td></tr>
+          <tr><td>範囲</td><td>広い</td><td>せまい</td></tr>
+          <tr><td>通過後</td><td>気温↑／南寄りの風</td><td>気温↓／北寄りの風</td></tr>
+        </table>
+        <div class="warn-box">
+          <strong>ひっかけ：</strong>「寒冷前線のほうが雨は強い」逆にしないこと！<br>
+          暖気が上にのる（温暖）＝ゆっくり雨、寒気が暖気の下に突っ込む（寒冷）＝激しい雨
+        </div>
+      </div>
+    </div>
+
+    <div class="k-card" onclick="this.classList.toggle('open')">
+      <div class="k-card-header">
+        <div class="k-card-icon">&#x1F3E0;</div>
+        <div class="k-card-info">
+          <div class="k-card-title">百葉箱の条件</div>
+          <div class="k-card-sub">全部にちゃんと理由がある</div>
+        </div>
+      </div>
+      <div class="k-card-body">
+        <table>
+          <tr><th>条件</th><th>理由</th></tr>
+          <tr><td><strong>白色</strong></td><td>太陽光を反射→温度が上がらない</td></tr>
+          <tr><td><strong>扉は北向き</strong></td><td>開けても直射日光が入らない</td></tr>
+          <tr><td><strong>芝生の上</strong></td><td>地面からの熱反射を防ぐ</td></tr>
+          <tr><td><strong>地上1.2〜1.5m</strong></td><td>人の目の高さで測るため</td></tr>
+          <tr><td><strong>よろい戸</strong></td><td>風通しをよくする</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="k-card" onclick="this.classList.toggle('open')">
+      <div class="k-card-header">
+        <div class="k-card-icon">&#x1F4E1;</div>
+        <div class="k-card-info">
+          <div class="k-card-title">観測システム（数字で覚える）</div>
+          <div class="k-card-sub">アメダス・ひまわり</div>
+        </div>
+      </div>
+      <div class="k-card-body">
+        <div class="formula-box">
+          <strong>アメダス（AMeDAS）</strong><br>
+          日本全国<strong>約1300箇所</strong>の自動気象観測システム
+        </div>
+        <div class="formula-box">
+          <strong>気象衛星＝ひまわり</strong><br>
+          人工衛星から雲の様子を撮影
+        </div>
+        <strong>湿度の公式（絶対暗記）</strong><br>
+        <div class="formula-box">
+          湿度(%) ＝ <strong>実際の水蒸気量 ÷ その気温の飽和水蒸気量 × 100</strong>
+        </div>
+        <strong>フェーン現象の数字</strong><br>
+        <div class="formula-box">
+          上昇100m＝<strong>1℃↓</strong>（雲なし）／<strong>0.5℃↓</strong>（雲あり）<br>
+          下降100m＝<strong>1℃↑</strong>（常に）
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== TAB 3: QUIZ ===== -->
+<div class="tab" id="tab3">
+  <div class="section-title">&#x2694; クイズバトル（30問）</div>
+  <div class="battle-arena" id="quizArea">
+    <div class="enemy-area">
+      <div class="enemy-sprite" id="enemySprite">&#x26C8;</div>
+      <div class="enemy-name" id="enemyName">気象モンスター</div>
+      <div class="enemy-hp-bar"><div class="enemy-hp-inner" id="enemyHp" style="width:100%"></div></div>
+    </div>
+    <div id="quizContent"></div>
+  </div>
+</div>
+
+<!-- ===== TAB 4: BOSS ===== -->
+<div class="tab" id="tab4">
+  <div class="boss-intro" id="bossIntro">
+    <div class="boss-sprite">&#x1F300;&#x26A1;&#x1F300;</div>
+    <div class="boss-title">BOSS: 台風大王</div>
+    <div class="boss-desc">全10問の総合テスト。単元の全部を理解していないと倒せない！<br>80%以上で討伐成功＆50XP獲得！</div>
+    <button class="boss-start-btn" onclick="startBoss()">挑戦する</button>
+  </div>
+  <div class="battle-arena" id="bossArea" style="display:none">
+    <div class="enemy-area">
+      <div class="enemy-sprite" id="bossSprite">&#x1F300;</div>
+      <div class="enemy-name" id="bossName">台風大王</div>
+      <div class="enemy-hp-bar"><div class="enemy-hp-inner" id="bossHp" style="width:100%"></div></div>
+    </div>
+    <div id="bossQuizContent"></div>
+  </div>
+  <div class="boss-result" id="bossResult">
+    <div class="result-icon" id="resultIcon"></div>
+    <div class="result-text" id="resultText"></div>
+    <div class="result-score" id="resultScore"></div>
+    <button class="boss-start-btn" onclick="startBoss()" style="margin-top:20px">もう一度挑戦</button>
+  </div>
+</div>
+
+<!-- ===== TAB 5: 5-DAY SCHEDULE ===== -->
+<div class="tab" id="tab5">
+  <div class="section-title">&#x1F4C5; 5日間 完全攻略スケジュール</div>
+
+  <div class="schedule-progress">
+    <div class="sp-title">全体進捗</div>
+    <div class="sp-bar-outer"><div class="sp-bar-inner" id="scheduleBar" style="width:0%"></div></div>
+    <div class="sp-text" id="scheduleText">0 / 5 日クリア</div>
+  </div>
+
+  <div class="schedule-day open" id="sday1" onclick="toggleDay(this)">
+    <div class="day-header">
+      <div class="day-num day-active">1</div>
+      <div class="day-info">
+        <div class="day-title">Day 1：気温と湿度の基礎</div>
+        <div class="day-subtitle">Stage 1〜3・身の回りの気象をつかむ</div>
+      </div>
+      <div class="day-time">約45分</div>
+    </div>
+    <div class="day-body">
+      <div class="task-group">
+        <div class="task-group-title">STEP 1：全体像を見る（10分）</div>
+        <div class="task-item">
+          <div class="task-check" onclick="event.stopPropagation();toggleCheck(this)"></div>
+          <div class="task-text">
+            <span class="task-tag tag-read">読む</span>「全体像」タブを最初から最後まで読む
+            <div class="task-detail">単元がどう分かれているか、何を覚えるかを把握する。これがブレーキを外す</div>
+          </div>
+        </div>
+      </div>
+      <div class="task-group">
+        <div class="task-group-title">STEP 2：気温・湿度の知識（20分）</div>
+        <div class="task-item">
+          <div class="task-check" onclick="event.stopPropagation();toggleCheck(this)"></div>
+          <div class="task-text">
+            <span class="task-tag tag-read">読む</span>攻略マップ Stage 1・2・3 を開いて読む
+            <div class="task-detail">気温の最高は午後2時、湿度公式、乾湿球のしくみ</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-check" onclick="event.stopPropagation();toggleCheck(this)"></div>
+          <div class="task-text">
+            <span class="task-tag tag-write">書く</span>湿度公式をノートに3回書く
+            <div class="task-detail">湿度(%)＝実際の水蒸気量÷その気温の飽和水蒸気量×100</div>
+          </div>
+        </div>
+      </div>
+      <div class="task-group">
+        <div class="task-group-title">STEP 3：問題を解く（15分）</div>
+        <div class="task-item">
+          <div class="task-check" onclick="event.stopPropagation();toggleCheck(this)"></div>
+          <div class="task-text">
+            <span class="task-tag tag-quiz">解く</span>栄冠[1][2]・定着応用[1]の湿度計算を解く
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-check" onclick="event.stopPropagation();toggleCheck(this)"></div>
+          <div class="task-text">
+            <span class="task-tag tag-quiz">解く</span>クイズタブから気温・湿度系だけ抜粋で10問
+          </div>
+        </div>
+      </div>
+      <button class="day-complete-btn" id="dayBtn1" onclick="event.stopPropagation();completeDay(1)">Day 1 クリア！</button>
+    </div>
+  </div>
+
+  <div class="schedule-day" id="sday2" onclick="toggleDay(this)">
+    <div class="day-header">
+      <div class="day-num day-pending">2</div>
+      <div class="day-info">
+        <div class="day-title">Day 2：計算系マスター（湿度＋フェーン）</div>
+        <div class="day-subtitle">Stage 2・4・計算で点を取りに行く</div>
+      </div>
+      <div class="day-time">約50分</div>
+    </div>
+    <div class="day-body">
+      <div class="task-group">
+        <div class="task-group-title">STEP 1：前日の復習（5分）</div>
+        <div class="task-item">
+          <div class="task-check" onclick="event.stopPropagation();toggleCheck(this)"></div>
+          <div class="task-text">
+            <span class="task-tag tag-review">復習</span>湿度公式を何も見ずに紙に書く
+          </div>
+        </div>
+      </div>
+      <div class="task-group">
+        <div class="task-group-title">STEP 2：フェーン現象（20分）</div>
+        <div class="task-item">
+          <div class="task-check" onclick="event.stopPropagation();toggleCheck(this)"></div>
+          <div class="task-text">
+            <span class="task-tag tag-read">読む</span>攻略マップ Stage 4 を読む
+            <div class="task-detail">上昇1℃／0.5℃・下降1℃の使い分けを完全理解</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-check" onclick="event.stopPropagation();toggleCheck(this)"></div>
+          <div class="task-text">
+            <span class="task-tag tag-write">書く</span>フェーンの計算ルール3つをノートに書く
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-check" onclick="event.stopPropagation();toggleCheck(this)"></div>
+          <div class="task-text">
+            <span class="task-tag tag-quiz">解く</span>栄冠[3]フェーン計算（A・B・C・D地点すべて）
+          </div>
+        </div>
+      </div>
+      <div class="task-group">
+        <div class="task-group-title">STEP 3：湿度計算の応用（20分）</div>
+        <div class="task-item">
+          <div class="task-check" onclick="event.stopPropagation();toggleCheck(this)"></div>
+          <div class="task-text">
+            <span class="task-tag tag-quiz">解く</span>定着応用[2]（露点・結露量・部屋の容積）
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-check" onclick="event.stopPropagation();toggleCheck(this)"></div>
+          <div class="task-text">
+            <span class="task-tag tag-review">復習</span>間違えた問題の解き直し
+          </div>
+        </div>
+      </div>
+      <button class="day-complete-btn" id="dayBtn2" onclick="event.stopPropagation();completeDay(2)">Day 2 クリア！</button>
+    </div>
+  </div>
+
+  <div class="schedule-day" id="sday3" onclick="toggleDay(this)">
+    <div class="day-header">
+      <div class="day-num day-pending">3</div>
+      <div class="day-info">
+        <div class="day-title">Day 3：風のしくみ</div>
+        <div class="day-subtitle">Stage 5・6・海陸風と季節風</div>
+      </div>
+      <div class="day-time">約40分</div>
+    </div>
+    <div class="day-body">
+      <div class="task-group">
+        <div class="task-group-title">STEP 1：前日の復習（10分）</div>
+        <div class="task-item">
+          <div class="task-check" onclick="event.stopPropagation();toggleCheck(this)"></div>
+          <div class="task-text">
+            <span class="task-tag tag-review">復習</span>フェーン計算をもう一度解く
+          </div>
+        </div>
+      </div>
+      <div class="task-group">
+        <div class="task-group-title">STEP 2：風の知識（15分）</div>
+        <div class="task-item">
+          <div class="task-check" onclick="event.stopPropagation();toggleCheck(this)"></div>
+          <div class="task-text">
+            <span class="task-tag tag-read">読む</span>攻略マップ Stage 5・6 を読む
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-check" onclick="event.stopPropagation();toggleCheck(this)"></div>
+          <div class="task-text">
+            <span class="task-tag tag-ankimi">暗記</span>暗記カード「風の向きまとめ」を開いて音読→ノートに書く
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-check" onclick="event.stopPropagation();toggleCheck(this)"></div>
+          <div class="task-text">
+            <span class="task-tag tag-write">書く</span>日本地図に夏と冬の季節風の矢印を書く
+            <div class="task-detail">夏は南東（↗）、冬は北西（↙）</div>
+          </div>
+        </div>
+      </div>
+      <div class="task-group">
+        <div class="task-group-title">STEP 3：問題を解く（15分）</div>
+        <div class="task-item">
+          <div class="task-check" onclick="event.stopPropagation();toggleCheck(this)"></div>
+          <div class="task-text">
+            <span class="task-tag tag-quiz">解く</span>定着基本[1]（海陸風・季節風）・栄冠[4]（風のふき方）
+          </div>
+        </div>
+      </div>
+      <button class="day-complete-btn" id="dayBtn3" onclick="event.stopPropagation();completeDay(3)">Day 3 クリア！</button>
+    </div>
+  </div>
+
+  <div class="schedule-day" id="sday4" onclick="toggleDay(this)">
+    <div class="day-header">
+      <div class="day-num day-pending">4</div>
+      <div class="day-info">
+        <div class="day-title">Day 4：日本の四季と台風・前線</div>
+        <div class="day-subtitle">Stage 7〜10・ここが一番ボリューム多め</div>
+      </div>
+      <div class="day-time">約55分</div>
+    </div>
+    <div class="day-body">
+      <div class="task-group">
+        <div class="task-group-title">STEP 1：気団を暗記（15分）</div>
+        <div class="task-item">
+          <div class="task-check" onclick="event.stopPropagation();toggleCheck(this)"></div>
+          <div class="task-text">
+            <span class="task-tag tag-ankimi">暗記</span>暗記カード「4つの気団」を読む→ノートに表を書く
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-check" onclick="event.stopPropagation();toggleCheck(this)"></div>
+          <div class="task-text">
+            <span class="task-tag tag-ankimi">暗記</span>暗記カード「四季の気圧配置」を音読
+            <div class="task-detail">夏＝南高北低、冬＝西高東低 は必ず口で言えるように</div>
+          </div>
+        </div>
+      </div>
+      <div class="task-group">
+        <div class="task-group-title">STEP 2：雲画像と天気図の読み方（15分）</div>
+        <div class="task-item">
+          <div class="task-check" onclick="event.stopPropagation();toggleCheck(this)"></div>
+          <div class="task-text">
+            <span class="task-tag tag-read">読む</span>攻略マップ Stage 8 を読む（季節判定のコツ）
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-check" onclick="event.stopPropagation();toggleCheck(this)"></div>
+          <div class="task-text">
+            <span class="task-tag tag-quiz">解く</span>定着基本[2][3]（天気図から季節判定）
+          </div>
+        </div>
+      </div>
+      <div class="task-group">
+        <div class="task-group-title">STEP 3：台風と前線（25分）</div>
+        <div class="task-item">
+          <div class="task-check" onclick="event.stopPropagation();toggleCheck(this)"></div>
+          <div class="task-text">
+            <span class="task-tag tag-read">読む</span>攻略マップ Stage 9・10 を読む
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-check" onclick="event.stopPropagation();toggleCheck(this)"></div>
+          <div class="task-text">
+            <span class="task-tag tag-ankimi">暗記</span>暗記カード「台風」「前線」「気圧配置」を全部開く
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-check" onclick="event.stopPropagation();toggleCheck(this)"></div>
+          <div class="task-text">
+            <span class="task-tag tag-quiz">解く</span>定着応用[3][4]＋栄冠[5][6] 全問
+          </div>
+        </div>
+      </div>
+      <button class="day-complete-btn" id="dayBtn4" onclick="event.stopPropagation();completeDay(4)">Day 4 クリア！</button>
+    </div>
+  </div>
+
+  <div class="schedule-day" id="sday5" onclick="toggleDay(this)">
+    <div class="day-header">
+      <div class="day-num day-pending">5</div>
+      <div class="day-info">
+        <div class="day-title">Day 5：観測＋総復習＋ボス討伐</div>
+        <div class="day-subtitle">Stage 11・12・単元完全マスター</div>
+      </div>
+      <div class="day-time">約50分</div>
+    </div>
+    <div class="day-body">
+      <div class="task-group">
+        <div class="task-group-title">STEP 1：観測のしくみ（10分）</div>
+        <div class="task-item">
+          <div class="task-check" onclick="event.stopPropagation();toggleCheck(this)"></div>
+          <div class="task-text">
+            <span class="task-tag tag-read">読む</span>攻略マップ Stage 11 を読む
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-check" onclick="event.stopPropagation();toggleCheck(this)"></div>
+          <div class="task-text">
+            <span class="task-tag tag-ankimi">暗記</span>百葉箱の条件5つ＋アメダス約1300＋ひまわり
+          </div>
+        </div>
+      </div>
+      <div class="task-group">
+        <div class="task-group-title">STEP 2：ひっかけチェック＆総復習（15分）</div>
+        <div class="task-item">
+          <div class="task-check" onclick="event.stopPropagation();toggleCheck(this)"></div>
+          <div class="task-text">
+            <span class="task-tag tag-read">読む</span>攻略マップ Stage 12「ひっかけポイント集」を全部読む
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-check" onclick="event.stopPropagation();toggleCheck(this)"></div>
+          <div class="task-text">
+            <span class="task-tag tag-review">復習</span>クイズタブで30問通しで解く（正答率80%目標）
+          </div>
+        </div>
+      </div>
+      <div class="task-group">
+        <div class="task-group-title">STEP 3：ボス討伐（15分）</div>
+        <div class="task-item">
+          <div class="task-check" onclick="event.stopPropagation();toggleCheck(this)"></div>
+          <div class="task-text">
+            <span class="task-tag tag-boss">ボス</span>ボス戦タブで台風大王に挑戦（80%以上で討伐）
+          </div>
+        </div>
+      </div>
+      <div class="task-group">
+        <div class="task-group-title">STEP 4：問題集通し（10分）</div>
+        <div class="task-item">
+          <div class="task-check" onclick="event.stopPropagation();toggleCheck(this)"></div>
+          <div class="task-text">
+            <span class="task-tag tag-review">復習</span>定着問題集＋栄冠の間違えた問題だけ解き直す
+          </div>
+        </div>
+      </div>
+      <button class="day-complete-btn" id="dayBtn5" onclick="event.stopPropagation();completeDay(5)">Day 5 クリア！全単元マスター！</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== CLOUD PARTICLES =====
+for(let i=0;i<5;i++){
+  const c=document.createElement('div');
+  c.className='cloud';
+  const size=60+Math.random()*80;
+  c.style.width=size+'px';
+  c.style.height=(size*0.5)+'px';
+  c.style.top=(Math.random()*40)+'%';
+  c.style.setProperty('--dur',(40+Math.random()*40)+'s');
+  c.style.animationDelay=(-Math.random()*60)+'s';
+  document.body.appendChild(c);
+}
+
+// ===== TAB SWITCH =====
+function showTab(n){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab'+n).classList.add('active');
+  document.querySelectorAll('.nav-btn')[n].classList.add('active');
+  window.scrollTo(0,0);
+  if(n===3 && !quizStarted) startQuiz();
+}
+
+// ===== XP =====
+let xp=parseInt(localStorage.getItem('kisho_xp')||'0');
+const XP_PER_LEVEL=100;
+function updateXP(){
+  const lv=Math.floor(xp/XP_PER_LEVEL)+1;
+  const cur=xp%XP_PER_LEVEL;
+  document.getElementById('lvBadge').textContent='Lv.'+lv;
+  document.getElementById('xpBar').style.width=(cur/XP_PER_LEVEL*100)+'%';
+  document.getElementById('xpText').textContent=cur+' / '+XP_PER_LEVEL+' XP';
+}
+function addXP(n){ xp+=n; localStorage.setItem('kisho_xp',xp); updateXP(); }
+updateXP();
+
+// ===== STAGE =====
+function toggleNode(el){
+  document.querySelectorAll('.stage-node').forEach(n=>{if(n!==el)n.classList.remove('open')});
+  el.classList.toggle('open');
+}
+function clearStage(btn){
+  const node=btn.closest('.stage-node');
+  if(node.classList.contains('cleared-node')) return;
+  node.classList.add('cleared-node');
+  node.querySelector('.node-icon').className='node-icon cleared';
+  btn.textContent='クリア済み！';
+  addXP(15);
+}
+
+// ===== QUIZ =====
+const quizzes = [
+  {cat:"気温の変化",q:"1日のうち気温が最も高くなるのは何時ごろ？",opts:["正午（12時）","午後1時","午後2時","午後4時"],ans:2,exp:"<strong>午後2時ごろ</strong>。太陽高度の最高は正午、地温の最高は1時、気温の最高は2時と1時間ずつ遅れる。"},
+  {cat:"気温の変化",q:"晴れの日とくもりの日で気温の変化が大きいのはどちら？",opts:["晴れの日","くもりの日","同じ","季節による"],ans:0,exp:"<strong>晴れの日</strong>。くもりの日は雲が熱の出入りをさえぎるので変化が小さい。"},
+  {cat:"気温の変化",q:"くもりの日に夜間の気温があまり下がらない理由は？",opts:["雲が熱を発するから","雲が地面の熱を宇宙へ逃がさないから","空気が湿っているから","太陽が雲にあたるから"],ans:1,exp:"<strong>雲が地面からの熱を宇宙へ逃がさない</strong>ので、夜も気温が下がりにくい。"},
+  {cat:"湿度",q:"湿度の公式で正しいのはどれ？",opts:["実際の水蒸気量÷飽和水蒸気量×100","飽和水蒸気量÷実際の水蒸気量×100","気温÷水蒸気量×100","水蒸気量×気温÷100"],ans:0,exp:"湿度(%)＝<strong>実際の水蒸気量÷その気温の飽和水蒸気量×100</strong>"},
+  {cat:"湿度",q:"気温30℃で1m³中に11.2gの水蒸気を含む空気の湿度は？（30℃の飽和水蒸気量30.4g）",opts:["約27%","約37%","約47%","約57%"],ans:1,exp:"11.2÷30.4×100≒<strong>約37%</strong>"},
+  {cat:"湿度",q:"気温が下がると湿度はどうなる？（水蒸気量は一定）",opts:["上がる","下がる","変わらない","どちらもあり"],ans:0,exp:"気温↓→飽和水蒸気量↓→<strong>湿度↑</strong>。さらに下がると露点に達して結露が始まる。"},
+  {cat:"湿度",q:"露点とはどんな温度？",opts:["気温が最高になる温度","湿度が100%になる温度","水が沸騰する温度","雲ができる高度の温度"],ans:1,exp:"<strong>湿度が100%になる温度＝露点</strong>。これ以下に下がると水てきが出始める。"},
+  {cat:"乾湿球湿度計",q:"乾湿球湿度計で湿球の方が乾球より温度が低い理由は？",opts:["ガーゼがひんやりしているから","水が蒸発するときまわりから熱をうばうから","湿球は太陽光を反射するから","乾球は加熱されているから"],ans:1,exp:"水が蒸発するとき<strong>まわりから熱をうばう（気化熱）</strong>ので湿球の温度が下がる。"},
+  {cat:"乾湿球湿度計",q:"湿度100%のとき乾球と湿球の差は？",opts:["大きい","差はない","湿球の方が高い","どちらもあり"],ans:1,exp:"湿度100%＝蒸発が起きない→<strong>乾球＝湿球（差0）</strong>"},
+  {cat:"乾湿球湿度計",q:"乾球と湿球の差が大きいのはどんなとき？",opts:["湿度が高いとき","湿度が低いとき","気温が低いとき","風が強いとき"],ans:1,exp:"<strong>湿度が低い</strong>→蒸発が多い→湿球の温度がより下がる→差が大きい。"},
+  {cat:"フェーン現象",q:"空気が100m上昇するとき（雲なし）、温度は何℃下がる？",opts:["0.5℃","1℃","2℃","5℃"],ans:1,exp:"雲ができる前の上昇は<strong>100mで1℃下がる</strong>。"},
+  {cat:"フェーン現象",q:"雲ができてから空気が100m上昇するとき、温度は何℃下がる？",opts:["0.1℃","0.5℃","1℃","1.5℃"],ans:1,exp:"雲ができてからは<strong>100mで0.5℃</strong>しか下がらない。水蒸気が水になるとき熱を出すから。"},
+  {cat:"フェーン現象",q:"空気が100m下降するとき、温度は何℃上がる？",opts:["0.5℃","1℃","2℃","雲の有無による"],ans:1,exp:"下降は雲の有無に関係なく<strong>100mで1℃上がる</strong>。"},
+  {cat:"海陸風",q:"晴れた日の昼、海岸ではどちらの方が温度が高い？",opts:["陸","海","同じ","午前と午後で逆"],ans:0,exp:"陸はあたたまりやすいので、昼は<strong>陸＞海</strong>。"},
+  {cat:"海陸風",q:"晴れた日の昼、海岸ではどちら向きに風がふく？",opts:["海→陸（海風）","陸→海（陸風）","東→西","南→北"],ans:0,exp:"陸の空気が上昇し海から流れ込む→<strong>海風（海→陸）</strong>"},
+  {cat:"海陸風",q:"夜、海岸ではどちら向きに風がふく？",opts:["海風","陸風","無風","強い南風"],ans:1,exp:"夜は海＞陸の温度→海の空気が上昇→<strong>陸風（陸→海）</strong>"},
+  {cat:"海陸風",q:"朝と夕に海岸で風がやむ状態を何という？",opts:["凪（なぎ）","潮風","無風帯","朝焼け"],ans:0,exp:"地面と海面の温度が等しくなる朝・夕に<strong>なぎ</strong>が起こる。"},
+  {cat:"季節風",q:"夏の季節風の向きは？",opts:["北西","南東","東","西"],ans:1,exp:"夏は<strong>南東の季節風</strong>（太平洋→大陸）。小笠原気団を運ぶ。"},
+  {cat:"季節風",q:"冬の季節風の向きは？",opts:["北西","南東","東南","北東"],ans:0,exp:"冬は<strong>北西の季節風</strong>（シベリア→太平洋）。シベリア気団を運ぶ。"},
+  {cat:"偏西風",q:"日本上空を1年中ふく偏西風の向きは？",opts:["東→西","西→東","南→北","北→南"],ans:1,exp:"偏西風は<strong>西から東</strong>へ。天気が西から東へ変わる、台風を北東へ流すのもこれ。"},
+  {cat:"気団",q:"シベリア気団の性質は？",opts:["冷たく湿っている","冷たく乾いている","あたたかく湿っている","あたたかく乾いている"],ans:1,exp:"大陸の北でできる→<strong>冷たく乾いている</strong>"},
+  {cat:"気団",q:"夏に日本に影響を与える気団は？",opts:["シベリア気団","オホーツク海気団","小笠原気団","揚子江気団"],ans:2,exp:"夏は南東から<strong>小笠原気団</strong>（暖・湿）が勢力を強める。"},
+  {cat:"気圧配置",q:"「南高北低」はいつの気圧配置？",opts:["春","夏","秋","冬"],ans:1,exp:"<strong>夏＝南高北低</strong>。冬は西高東低。"},
+  {cat:"気圧配置",q:"「西高東低」はいつの気圧配置？",opts:["春","夏","秋","冬"],ans:3,exp:"<strong>冬＝西高東低</strong>。シベリア高気圧が強く、日本海側に雪。"},
+  {cat:"季節判定",q:"日本海側にすじ状の雲が見られる季節は？",opts:["春","梅雨","夏","冬"],ans:3,exp:"<strong>冬</strong>の特徴。シベリアからの季節風が日本海で水蒸気を含み、山脈にぶつかって雲になる。"},
+  {cat:"台風",q:"台風の定義で正しいのは？",opts:["熱帯低気圧のうち中心気圧1000hPa未満","熱帯低気圧のうち最大風速秒速17.2m以上","熱帯低気圧のうち雨量35mm以上","熱帯低気圧のうち目がはっきりあるもの"],ans:1,exp:"台風＝熱帯低気圧のうち<strong>最大風速が秒速17.2m以上</strong>"},
+  {cat:"台風",q:"台風によって引き起こされない現象は？",opts:["高潮","洪水","津波","暴風"],ans:2,exp:"<strong>津波は地震</strong>による！台風は高潮・洪水・暴風・大雨。"},
+  {cat:"前線",q:"寒冷前線にともなう雲は？",opts:["乱層雲","積乱雲（入道雲）","巻雲","層雲"],ans:1,exp:"寒気が暖気の下にもぐりこんで暖気を押し上げる→<strong>積乱雲（入道雲）</strong>"},
+  {cat:"前線",q:"温暖前線が通過したときの雨の特徴は？",opts:["強い雨が短時間","弱い雨が長時間","雨はほぼ降らない","暴風雨"],ans:1,exp:"温暖前線＝暖気がゆっくり乗り上げる→<strong>弱い雨が長時間</strong>広範囲"},
+  {cat:"百葉箱",q:"百葉箱の扉はどの方角を向いている？",opts:["南","北","東","西"],ans:1,exp:"<strong>北向き</strong>。開けても直射日光が入らないように。"}
+];
+
+// ===== QUIZ ENGINE =====
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+let quizStarted=false, qIdx=0, qCorrect=0, qPool=[], bossPool=[];
+const enemies=[
+  {name:"タイフーン",sprite:"&#x1F300;"},
+  {name:"カミナリオヤジ",sprite:"&#x26A1;"},
+  {name:"フェーンモンスター",sprite:"&#x1F525;"},
+  {name:"シッケリーナ",sprite:"&#x1F4A7;"},
+  {name:"セツゼンドラゴン",sprite:"&#x2744;"},
+  {name:"キダンボス",sprite:"&#x1F32B;"}
+];
+
+function startQuiz(){
+  quizStarted=true;
+  qPool=shuffle([...quizzes]);
+  qIdx=0; qCorrect=0;
+  showQuizQ('quizContent','enemySprite','enemyName','enemyHp',qPool,false);
+}
+
+function showQuizQ(containerId,spriteId,nameId,hpId,pool,isBoss){
+  if(qIdx>=pool.length){
+    const cont=document.getElementById(containerId);
+    const pct=Math.round(qCorrect/pool.length*100);
+    cont.innerHTML=`
+      <div style="text-align:center;padding:30px 0">
+        <div style="font-size:3em;margin-bottom:10px">${pct>=80?'&#x1F389;':'&#x1F4AA;'}</div>
+        <div style="font-size:1.2em;font-weight:900;color:#cc5500">${pct>=80?'すばらしい！':'もう少し！'}</div>
+        <div style="font-size:2em;font-weight:900;margin:10px 0;color:#1a4a7a">${qCorrect} / ${pool.length} 正解 (${pct}%)</div>
+        <button onclick="${isBoss?'startBoss()':'restartQuiz()'}" style="margin-top:16px;padding:12px 32px;border:none;border-radius:12px;font-size:1em;font-weight:900;cursor:pointer;font-family:inherit;color:#fff;background:linear-gradient(135deg,#3c8cdb,#2060a8)">もう一度</button>
+      </div>`;
+    if(isBoss){
+      document.getElementById('bossArea').style.display='none';
+      document.getElementById('bossResult').style.display='block';
+      document.getElementById('resultIcon').innerHTML=pct>=80?'&#x1F3C6;':'&#x1F4AA;';
+      document.getElementById('resultText').textContent=pct>=80?'台風大王を討伐！':'あと少し...';
+      document.getElementById('resultScore').textContent=qCorrect+' / '+pool.length+' ('+pct+'%)';
+    }
+    if(pct>=80 && isBoss) addXP(50);
+    return;
+  }
+  const q=pool[qIdx];
+  const e=enemies[qIdx%enemies.length];
+  document.getElementById(spriteId).innerHTML=isBoss?'&#x1F300;':e.sprite;
+  document.getElementById(nameId).textContent=isBoss?'台風大王 ('+(qIdx+1)+'/'+pool.length+')':e.name;
+  const hpPct=((pool.length-qIdx)/pool.length*100);
+  document.getElementById(hpId).style.width=hpPct+'%';
+  const cont=document.getElementById(containerId);
+  const optHtml=q.opts.map((o,i)=>`<button class="q-opt" onclick="answerQ(${i},${q.ans},'${containerId}','${spriteId}','${nameId}','${hpId}',${isBoss})">${o}</button>`).join('');
+  cont.innerHTML=`
+    <div class="q-category">${q.cat}</div>
+    <div class="q-text">${q.q}</div>
+    <div class="q-options">${optHtml}</div>
+    <div class="q-explanation" id="qExp_${containerId}">${q.exp}</div>
+    <button class="q-next-btn" id="qNext_${containerId}" onclick="nextQ('${containerId}','${spriteId}','${nameId}','${hpId}',${isBoss})">次の問題へ</button>`;
+}
+
+function answerQ(sel,ans,cid,sid,nid,hid,isBoss){
+  const opts=document.querySelectorAll('#'+cid+' .q-opt');
+  opts.forEach((o,i)=>{
+    o.classList.add('disabled');
+    if(i===ans) o.classList.add('correct');
+    if(i===sel && i!==ans) o.classList.add('wrong');
+  });
+  if(sel===ans){
+    qCorrect++;
+    addXP(5);
+    const sp=document.getElementById(sid);
+    sp.classList.add('hit');
+    setTimeout(()=>sp.classList.remove('hit'),400);
+  }
+  document.getElementById('qExp_'+cid).style.display='block';
+  document.getElementById('qNext_'+cid).style.display='inline-block';
+}
+
+function nextQ(cid,sid,nid,hid,isBoss){
+  qIdx++;
+  showQuizQ(cid,sid,nid,hid,isBoss?bossPool:qPool,isBoss);
+}
+
+function restartQuiz(){
+  qPool=shuffle([...quizzes]);
+  qIdx=0; qCorrect=0;
+  showQuizQ('quizContent','enemySprite','enemyName','enemyHp',qPool,false);
+}
+
+// ===== BOSS =====
+const bossQuizzes = [
+  {cat:"複合:湿度計算",q:"気温20℃で1m³に13.0gの水蒸気を含む空気を15℃まで下げると何gの水てきが出る？（飽和水蒸気量：20℃=17.3g、15℃=12.8g）",opts:["0.2g","1.2g","4.5g","5.5g"],ans:0,exp:"結露量＝実際−下げた温度の飽和水蒸気量＝<strong>13.0−12.8＝0.2g</strong>"},
+  {cat:"複合:フェーン",q:"風上A地点28℃、600mで雲発生、山頂2000m。山頂での温度は？",opts:["13℃","15℃","17℃","22℃"],ans:1,exp:"600mまで1℃下降×6＝22℃、600→2000mは雲あり0.5℃下降×14＝15℃。<strong>山頂15℃</strong>"},
+  {cat:"複合:季節判定",q:"天気図に「横長の停滞前線」が日本付近にある。この季節は？",opts:["春","梅雨","夏","冬"],ans:1,exp:"停滞前線（梅雨前線）が日本付近にのびる→<strong>梅雨</strong>"},
+  {cat:"複合:気団と季節",q:"『蒸し暑い夏、南東の風が強い』この原因となる気団は？",opts:["シベリア気団","オホーツク海気団","小笠原気団","揚子江気団"],ans:2,exp:"夏＝南東の季節風＋南高北低＝<strong>小笠原気団</strong>（暖・湿）が強い"},
+  {cat:"複合:台風",q:"観測地点の東側を台風が北上した場合、風向の変化は？",opts:["東→北→西","東→南→西","北→東→南","南→西→北"],ans:1,exp:"台風は反時計回り。東を通るときは観測地点から見て風が<strong>東→南→西</strong>と変化する。"},
+  {cat:"複合:前線と天気",q:"寒冷前線が通過した直後、気温と風はどうなる？",opts:["気温↑・南寄りの風","気温↓・北寄りの風","気温↑・北寄りの風","変化なし"],ans:1,exp:"寒冷前線通過後は寒気に覆われる→<strong>気温↓・北寄りの風</strong>"},
+  {cat:"複合:雲画像",q:"日本海側にすじ状の雲があり、太平洋側は雲が少ない雲画像。気圧配置は？",opts:["南高北低","西高東低","帯状の停滞前線","うずまき"],ans:1,exp:"日本海側すじ状雲＝冬＝<strong>西高東低</strong>"},
+  {cat:"複合:百葉箱",q:"百葉箱の扉が北向きな理由として正しいのは？",opts:["北風を入れるため","扉を開けても直射日光が入らないため","北極星を基準にするため","太陽を測るため"],ans:1,exp:"測定のために開けても<strong>直射日光が温度計に当たらない</strong>ようにするため"},
+  {cat:"複合:乾湿球",q:"乾球温度12℃、湿球温度10℃のとき、湿度表で湿度76%と読めた。この値から湿球温度だけを8℃に下げて測ると、湿度はどうなる？",opts:["高くなる","低くなる","変わらない","わからない"],ans:1,exp:"差が大きくなる＝蒸発が多い＝<strong>湿度が低い</strong>"},
+  {cat:"複合:総合",q:"日本の天気が『西から東へ変わる』のは何の影響？",opts:["偏西風","地球の自転","季節風","海陸風"],ans:0,exp:"上空を1年中ふく<strong>偏西風</strong>により、天気は西から東へ移動する"}
+];
+
+function startBoss(){
+  document.getElementById('bossIntro').style.display='none';
+  document.getElementById('bossResult').style.display='none';
+  document.getElementById('bossArea').style.display='block';
+  bossPool=shuffle([...bossQuizzes]);
+  qIdx=0; qCorrect=0;
+  showQuizQ('bossQuizContent','bossSprite','bossName','bossHp',bossPool,true);
+}
+
+// ===== SCHEDULE =====
+let completedDays = new Set();
+try {
+  const saved = JSON.parse(localStorage.getItem('kisho_schedule') || '[]');
+  saved.forEach(d => { completedDays.add(d); });
+} catch(e){}
+
+function toggleDay(el) {
+  const wasOpen = el.classList.contains('open');
+  document.querySelectorAll('.schedule-day').forEach(d => d.classList.remove('open'));
+  if (!wasOpen) el.classList.add('open');
+}
+
+function toggleCheck(el) {
+  el.classList.toggle('checked');
+  const textEl = el.nextElementSibling;
+  if (el.classList.contains('checked')) textEl.classList.add('done');
+  else textEl.classList.remove('done');
+}
+
+function completeDay(n) {
+  completedDays.add(n);
+  localStorage.setItem('kisho_schedule', JSON.stringify([...completedDays]));
+  updateScheduleUI();
+  addXP(25);
+}
+
+function updateScheduleUI() {
+  for (let i = 1; i <= 5; i++) {
+    const dayEl = document.getElementById('sday' + i);
+    if(!dayEl) continue;
+    const numEl = dayEl.querySelector('.day-num');
+    const btn = document.getElementById('dayBtn' + i);
+    if (completedDays.has(i)) {
+      numEl.className = 'day-num day-done';
+      if(btn){ btn.textContent = 'Day ' + i + ' クリア済み！'; btn.classList.add('completed'); }
+    } else {
+      const allPriorDone = [...Array(i-1).keys()].every(j => completedDays.has(j+1));
+      if (allPriorDone || i === 1) numEl.className = 'day-num day-active';
+      else numEl.className = 'day-num day-pending';
+    }
+  }
+  const done = completedDays.size;
+  const pct = Math.round(done / 5 * 100);
+  document.getElementById('scheduleBar').style.width = pct + '%';
+  document.getElementById('scheduleText').textContent = done + ' / 5 日クリア' + (done >= 5 ? ' - 完全攻略！' : '');
+}
+updateScheduleUI();
+</script>
+
+</body>
+</html>
