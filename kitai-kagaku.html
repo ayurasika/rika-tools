@@ -1,0 +1,1727 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>気体と化学反応マスター - 単元攻略RPG</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #0a1a1e;
+    color: #e0f0f0;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  /* ===== AQUA BG ===== */
+  .aqua-bg {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(ellipse at 30% 20%, #0d2530 0%, #0a1a22 50%, #050d12 100%);
+    z-index: -2;
+  }
+  .bubble {
+    position: fixed;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, rgba(180,240,255,0.5), rgba(78,205,196,0.05));
+    border: 1px solid rgba(180,240,255,0.2);
+    z-index: -1;
+    animation: floatup var(--dur) linear infinite;
+  }
+  @keyframes floatup {
+    0% { transform: translateY(0) translateX(0); opacity: 0; }
+    10% { opacity: 0.6; }
+    90% { opacity: 0.6; }
+    100% { transform: translateY(-110vh) translateX(var(--drift, 20px)); opacity: 0; }
+  }
+
+  /* ===== HEADER ===== */
+  .game-header {
+    background: linear-gradient(180deg, rgba(10,30,35,0.97) 0%, rgba(10,26,30,0.92) 100%);
+    border-bottom: 2px solid #2a7a7a;
+    padding: 12px 16px;
+    position: sticky; top: 0; z-index: 100;
+    backdrop-filter: blur(10px);
+  }
+  .header-top {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 8px;
+  }
+  .game-title {
+    font-size: 1.1em; font-weight: 900;
+    background: linear-gradient(135deg, #4ecdc4, #a0f0e0);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .mastery-display {
+    background: linear-gradient(135deg, #4ecdc4, #2a8a8a);
+    color: #04141a; font-weight: 900; font-size: 0.9em;
+    padding: 4px 12px; border-radius: 20px;
+    transition: all 0.5s;
+  }
+  .mastery-display.max {
+    background: linear-gradient(135deg, #ffd700, #ffaa00);
+    color: #2a1a00;
+    box-shadow: 0 0 16px rgba(255,215,0,0.6);
+    animation: pulse-gold 2s infinite;
+  }
+  @keyframes pulse-gold {
+    0%,100% { box-shadow: 0 0 16px rgba(255,215,0,0.6); }
+    50% { box-shadow: 0 0 24px rgba(255,215,0,0.9); }
+  }
+  .mastery-bar-wrap {
+    background: rgba(255,255,255,0.1);
+    height: 10px; border-radius: 5px; overflow: hidden; position: relative;
+  }
+  .mastery-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4ecdc4, #80f0e0);
+    transition: all 0.6s;
+    border-radius: 5px;
+  }
+  .mastery-bar-fill.max {
+    background: linear-gradient(90deg, #ffd700, #ffaa00, #ffd700);
+    background-size: 200% 100%;
+    animation: shine 2s linear infinite;
+  }
+  @keyframes shine {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+  .mastery-text {
+    font-size: 0.72em; color: #b0e0e0; margin-top: 3px;
+    display: flex; justify-content: space-between;
+  }
+  .mastery-text.max { color: #ffd700; font-weight: 900; }
+  .mastery-breakdown {
+    display: flex; flex-wrap: wrap; gap: 4px 10px;
+    font-size: 0.66em; color: #80c0c0;
+  }
+  .mb-item.done { color: #80f0e0; }
+  .mastery-text.max .mastery-breakdown .mb-item { color: #ffe066; }
+
+  /* ===== TABS ===== */
+  .tab-nav {
+    display: flex; gap: 4px; padding: 8px; overflow-x: auto;
+    background: rgba(10,30,35,0.9); border-bottom: 1px solid rgba(78,205,196,0.2);
+    position: sticky; top: 70px; z-index: 99;
+  }
+  .tab-btn {
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(78,205,196,0.3);
+    color: #b0e0e0;
+    padding: 8px 14px; border-radius: 20px;
+    font-size: 0.85em; font-weight: 700;
+    cursor: pointer; white-space: nowrap;
+    transition: all 0.3s;
+  }
+  .tab-btn.active {
+    background: linear-gradient(135deg, #4ecdc4, #2a8a8a);
+    color: #04141a;
+    border-color: #4ecdc4;
+  }
+
+  .tab-content { display: none; padding: 16px; }
+  .tab-content.active { display: block; }
+
+  /* ===== HEADINGS ===== */
+  h2 {
+    font-size: 1.3em; font-weight: 900;
+    background: linear-gradient(135deg, #4ecdc4, #80f0e0);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+  }
+  h3 { font-size: 1.05em; color: #80f0e0; margin: 16px 0 8px; }
+
+  p { line-height: 1.7; color: #d0e8e8; }
+  strong { color: #ffe066; font-weight: 900; }
+
+  /* ===== TAB 0: OVERVIEW ===== */
+  .overview-intro {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(78,205,196,0.25);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 16px;
+    line-height: 1.75;
+    color: #d8eeee;
+  }
+  .vol-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+    margin-bottom: 18px;
+  }
+  .vol-card {
+    background: rgba(78,205,196,0.08);
+    border: 1px solid rgba(78,205,196,0.3);
+    border-radius: 10px;
+    padding: 10px 6px;
+    text-align: center;
+  }
+  .vol-num { font-size: 1.6em; font-weight: 900; color: #80f0e0; }
+  .vol-label { font-size: 0.72em; color: #b0d0d0; }
+
+  .group-section {
+    background: rgba(255,255,255,0.03);
+    border-left: 4px solid #4ecdc4;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+  }
+  .group-title { font-weight: 900; color: #80f0e0; margin-bottom: 6px; font-size: 0.95em; }
+  .group-list { font-size: 0.86em; color: #c8e8e8; line-height: 1.7; }
+
+  .badge {
+    display: inline-block;
+    font-size: 0.65em; font-weight: 900;
+    padding: 1px 6px; border-radius: 8px;
+    margin-right: 4px; vertical-align: middle;
+  }
+  .b-anki { background: #ff6b6b; color: #fff; }
+  .b-calc { background: #3c8cdb; color: #fff; }
+  .b-read { background: #4abf4a; color: #fff; }
+
+  .ankimi-box {
+    background: rgba(255,140,80,0.08);
+    border: 1px solid #ff8c50;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin: 14px 0;
+  }
+  .ankimi-box h3 { color: #ffb380; margin-top: 0; }
+  .ankimi-list { list-style: none; padding-left: 0; }
+  .ankimi-list li {
+    padding: 4px 0 4px 18px;
+    position: relative;
+    font-size: 0.88em;
+    color: #f0dccc;
+    line-height: 1.6;
+  }
+  .ankimi-list li::before {
+    content: "▸"; position: absolute; left: 4px; color: #ff8c50;
+  }
+
+  .nav-btn {
+    display: block;
+    background: linear-gradient(135deg, #4ecdc4, #2a8a8a);
+    color: #04141a;
+    text-align: center;
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: 900;
+    margin: 16px 0;
+    cursor: pointer;
+    border: none;
+    width: 100%;
+    font-size: 0.95em;
+  }
+
+  /* ===== TAB 1: STAGES ===== */
+  .stage-list {
+    display: flex; flex-direction: column; gap: 8px;
+    position: relative;
+    padding-left: 50px;
+  }
+  .stage-list::before {
+    content: ""; position: absolute; left: 23px; top: 30px; bottom: 30px;
+    width: 4px;
+    background: linear-gradient(180deg, #4ecdc4, #80f0e0, #4ecdc4);
+    border-radius: 2px;
+    opacity: 0.5;
+  }
+  .stage-card {
+    position: relative;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(78,205,196,0.3);
+    border-radius: 12px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .stage-card.cleared {
+    background: rgba(78,205,196,0.1);
+    border-color: #4ecdc4;
+  }
+  .stage-icon {
+    position: absolute;
+    left: -42px; top: 12px;
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, #4ecdc4, #2a8a8a);
+    color: #04141a;
+    font-weight: 900;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.9em;
+    border: 3px solid #0a1a1e;
+  }
+  .stage-card.cleared .stage-icon::after {
+    content: "✓"; position: absolute; right: -8px; bottom: -8px;
+    background: #4abf4a; color: #fff;
+    width: 18px; height: 18px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7em;
+  }
+  .stage-title {
+    font-weight: 900; color: #80f0e0; margin-bottom: 4px;
+    font-size: 0.98em;
+  }
+  .stage-summary { font-size: 0.83em; color: #b0d0d0; }
+  .stage-detail { display: none; margin-top: 10px; font-size: 0.88em; }
+  .stage-card.open .stage-detail { display: block; }
+  .stage-detail ul { list-style: none; padding-left: 0; }
+  .stage-detail li {
+    padding: 4px 0 4px 18px;
+    position: relative;
+    color: #d0e8e8;
+    line-height: 1.6;
+  }
+  .stage-detail li::before {
+    content: "・"; position: absolute; left: 4px; color: #4ecdc4;
+  }
+  .keyword-tags { margin-top: 8px; }
+  .tag {
+    display: inline-block;
+    background: rgba(78,205,196,0.15);
+    color: #80f0e0;
+    font-size: 0.7em;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin: 2px 4px 2px 0;
+    border: 1px solid rgba(78,205,196,0.3);
+  }
+  .clear-btn {
+    background: linear-gradient(135deg, #4ecdc4, #2a8a8a);
+    color: #04141a;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 16px;
+    font-weight: 900;
+    cursor: pointer;
+    font-size: 0.8em;
+    margin-top: 8px;
+  }
+  .clear-btn.cleared {
+    background: #2a4a4a; color: #80f0e0;
+  }
+
+  /* ===== TAB 2: ANKI CARDS ===== */
+  .anki-intro {
+    background: rgba(255,224,102,0.08);
+    border: 1px solid rgba(255,224,102,0.3);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 14px;
+    font-size: 0.86em;
+    color: #ffe8b0;
+    line-height: 1.7;
+  }
+  .anki-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(78,205,196,0.3);
+    border-radius: 12px;
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .anki-q {
+    padding: 12px 14px;
+    cursor: pointer;
+    font-weight: 700;
+    color: #80f0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .anki-q::after { content: "▼"; transition: transform 0.3s; font-size: 0.7em; }
+  .anki-card.open .anki-q::after { transform: rotate(180deg); }
+  .anki-a {
+    display: none;
+    padding: 0 14px 14px;
+    border-top: 1px solid rgba(78,205,196,0.15);
+    padding-top: 10px;
+    font-size: 0.9em;
+    line-height: 1.7;
+    color: #d8eeee;
+  }
+  .anki-card.open .anki-a { display: block; }
+
+  table {
+    width: 100%; border-collapse: collapse;
+    margin: 10px 0; font-size: 0.78em;
+  }
+  th, td {
+    padding: 6px 4px;
+    border: 1px solid rgba(78,205,196,0.3);
+    text-align: center;
+  }
+  th { background: rgba(78,205,196,0.15); color: #80f0e0; font-weight: 700; }
+  td { color: #d8eeee; }
+  td.l { text-align: left; }
+
+  .formula-box {
+    background: rgba(255,224,102,0.08);
+    border: 1px solid #ffe066;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin: 10px 0;
+  }
+  .formula-box .ftitle { color: #ffe066; font-weight: 900; margin-bottom: 4px; font-size: 0.9em; }
+  .warn-box {
+    background: rgba(255,107,107,0.08);
+    border: 1px solid #ff6b6b;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin: 10px 0;
+  }
+  .warn-box .ftitle { color: #ff8b8b; font-weight: 900; margin-bottom: 4px; font-size: 0.9em; }
+  .tip-box {
+    background: rgba(74,191,74,0.08);
+    border: 1px solid #4abf4a;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin: 10px 0;
+  }
+  .tip-box .ftitle { color: #80df80; font-weight: 900; margin-bottom: 4px; font-size: 0.9em; }
+
+  /* ===== HIDE-TO-REVEAL ===== */
+  .hide {
+    filter: blur(7px);
+    opacity: 0.55;
+    transition: filter 0.6s cubic-bezier(0.25, 0.1, 0.25, 1),
+                opacity 0.6s ease,
+                background 0.4s ease,
+                color 0.4s ease;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    text-shadow: 0 0 6px rgba(78,205,196,0.4);
+    position: relative;
+  }
+  td.hide {
+    background: rgba(78,205,196,0.08);
+    box-shadow: inset 0 0 0 1px rgba(78,205,196,0.2);
+  }
+  td.hide::after {
+    content: "";
+    position: absolute; inset: 2px;
+    background: radial-gradient(circle, rgba(78,205,196,0.18), transparent 70%);
+    pointer-events: none;
+    border-radius: 4px;
+    animation: hide-pulse 2.4s ease-in-out infinite;
+    transition: opacity 0.4s;
+  }
+  @keyframes hide-pulse {
+    0%,100% { opacity: 0.4; }
+    50% { opacity: 0.85; }
+  }
+  .hide:hover, .hide.show {
+    filter: blur(0);
+    opacity: 1;
+    text-shadow: 0 0 14px rgba(255,224,102,0.7);
+    color: #ffe066;
+  }
+  td.hide:hover, td.hide.show {
+    background: rgba(255,224,102,0.12);
+    box-shadow: inset 0 0 0 1px rgba(255,224,102,0.5);
+    animation: reveal-flash 0.6s ease;
+  }
+  td.hide:hover::after, td.hide.show::after { opacity: 0; }
+  @keyframes reveal-flash {
+    0% { transform: scale(1); }
+    30% { transform: scale(1.06); }
+    100% { transform: scale(1); }
+  }
+  .hide-hint {
+    display: inline-block;
+    font-size: 0.7em;
+    color: #80c0c0;
+    margin-left: 6px;
+    font-weight: 400;
+  }
+  .hide-hint::before { content: "👁 "; }
+
+  /* ===== ANKI DONE BUTTON ===== */
+  .anki-done-wrap {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 6px;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px dashed rgba(78,205,196,0.25);
+  }
+  .anki-done-hint {
+    font-size: 0.78em;
+    color: #b0d0d0;
+    text-align: center;
+  }
+  .anki-done-btn {
+    width: 100%;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, #ff8c50, #ffb380);
+    color: #2a1a00;
+    border: none;
+    border-radius: 14px;
+    font-weight: 900;
+    font-size: 1em;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 14px rgba(255,140,80,0.35);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .anki-done-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(255,140,80,0.55);
+  }
+  .anki-done-btn:active { transform: translateY(0); }
+  .anki-done-btn.done {
+    background: linear-gradient(135deg, #4abf4a, #80df80);
+    color: #fff;
+    cursor: default;
+    box-shadow: 0 0 14px rgba(74,191,74,0.4);
+    animation: done-pop 0.5s ease;
+  }
+  @keyframes done-pop {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+  }
+
+  /* ===== TAB 3: QUIZ ===== */
+  .enemy-area {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(78,205,196,0.3);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 14px;
+    text-align: center;
+  }
+  .enemy-emoji { font-size: 3em; transition: transform 0.3s; display: inline-block; }
+  .enemy-emoji.hit { animation: shake 0.4s; }
+  @keyframes shake {
+    0%,100% { transform: translateX(0) rotate(0); }
+    25% { transform: translateX(-12px) rotate(-8deg); }
+    75% { transform: translateX(12px) rotate(8deg); }
+  }
+  .enemy-name { color: #ff8b8b; font-weight: 900; margin-top: 6px; }
+  .enemy-hp-bar {
+    background: rgba(255,255,255,0.1);
+    height: 8px; border-radius: 4px; overflow: hidden;
+    margin-top: 10px;
+  }
+  .enemy-hp-fill {
+    height: 100%; background: linear-gradient(90deg, #ff6b6b, #ff8b8b);
+    transition: width 0.5s;
+  }
+  .qcard {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(78,205,196,0.3);
+    border-radius: 12px;
+    padding: 14px;
+  }
+  .qcat {
+    display: inline-block;
+    background: rgba(78,205,196,0.2);
+    color: #80f0e0;
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-size: 0.72em;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .qtext {
+    color: #d8eeee;
+    font-weight: 700;
+    line-height: 1.6;
+    margin-bottom: 12px;
+    font-size: 0.95em;
+  }
+  .qopt {
+    display: block;
+    width: 100%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(78,205,196,0.3);
+    color: #d8eeee;
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin-bottom: 6px;
+    text-align: left;
+    cursor: pointer;
+    font-size: 0.88em;
+    transition: all 0.2s;
+  }
+  .qopt:hover { background: rgba(78,205,196,0.1); }
+  .qopt.correct {
+    background: rgba(74,191,74,0.2); border-color: #4abf4a; color: #80df80;
+  }
+  .qopt.wrong {
+    background: rgba(255,107,107,0.2); border-color: #ff6b6b; color: #ff8b8b;
+  }
+  .explanation {
+    margin-top: 10px;
+    padding: 10px;
+    background: rgba(255,224,102,0.08);
+    border-left: 3px solid #ffe066;
+    border-radius: 6px;
+    font-size: 0.82em;
+    line-height: 1.6;
+    color: #f0e8b0;
+    display: none;
+  }
+  .explanation.show { display: block; }
+  .next-q-btn {
+    margin-top: 10px;
+    background: linear-gradient(135deg, #4ecdc4, #2a8a8a);
+    color: #04141a;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: 900;
+    cursor: pointer;
+    width: 100%;
+    display: none;
+  }
+  .next-q-btn.show { display: block; }
+  .quiz-result {
+    text-align: center;
+    padding: 20px;
+    background: rgba(78,205,196,0.1);
+    border: 2px solid #4ecdc4;
+    border-radius: 12px;
+  }
+  .quiz-result h3 { color: #80f0e0; font-size: 1.4em; margin-bottom: 10px; }
+  .quiz-result .score { font-size: 2em; color: #ffe066; font-weight: 900; }
+
+  /* ===== TAB 4: BOSS ===== */
+  .boss-intro {
+    text-align: center;
+    padding: 30px 20px;
+    background: rgba(255,107,107,0.08);
+    border: 2px solid #ff6b6b;
+    border-radius: 12px;
+  }
+  .boss-emoji { font-size: 4em; }
+  .boss-name { color: #ff6b6b; font-weight: 900; font-size: 1.4em; margin: 10px 0; }
+  .boss-desc { color: #d8eeee; font-size: 0.9em; line-height: 1.7; margin-bottom: 16px; }
+  .boss-start-btn {
+    background: linear-gradient(135deg, #ff6b6b, #ff8b8b);
+    color: #fff; border: none;
+    padding: 12px 30px;
+    border-radius: 24px;
+    font-weight: 900;
+    font-size: 1em;
+    cursor: pointer;
+  }
+  .boss-result-victory {
+    border-color: #4abf4a; background: rgba(74,191,74,0.1);
+  }
+
+  /* ===== TAB 5: SCHEDULE ===== */
+  .schedule-progress {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(78,205,196,0.3);
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 14px;
+  }
+  .sp-bar-wrap {
+    background: rgba(255,255,255,0.1);
+    height: 10px; border-radius: 5px; overflow: hidden;
+    margin: 8px 0;
+  }
+  .sp-bar-fill {
+    height: 100%; background: linear-gradient(90deg, #4ecdc4, #80f0e0);
+    transition: width 0.5s;
+  }
+  .day-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(78,205,196,0.3);
+    border-radius: 12px;
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .day-card.cleared {
+    background: rgba(78,205,196,0.1);
+    border-color: #4ecdc4;
+  }
+  .day-header {
+    padding: 12px 14px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .day-title { font-weight: 900; color: #80f0e0; font-size: 0.95em; }
+  .day-time { font-size: 0.76em; color: #b0d0d0; }
+  .day-detail { display: none; padding: 0 14px 14px; }
+  .day-card.open .day-detail { display: block; }
+  .day-card.cleared .day-header::after {
+    content: "✓"; color: #4abf4a; font-weight: 900; font-size: 1.2em;
+  }
+  .step-block {
+    background: rgba(255,255,255,0.03);
+    border-left: 3px solid #4ecdc4;
+    border-radius: 6px;
+    padding: 10px;
+    margin-bottom: 8px;
+  }
+  .step-title { font-weight: 700; color: #80f0e0; margin-bottom: 6px; font-size: 0.88em; }
+  .task-row {
+    display: flex; align-items: flex-start; gap: 8px;
+    padding: 4px 0;
+    font-size: 0.84em;
+    line-height: 1.6;
+    color: #d8eeee;
+  }
+  .task-row input[type="checkbox"] {
+    margin-top: 4px;
+    accent-color: #4ecdc4;
+    width: 14px; height: 14px;
+    flex-shrink: 0;
+  }
+  .ttag {
+    display: inline-block;
+    font-size: 0.65em; font-weight: 700;
+    padding: 1px 6px; border-radius: 8px;
+    margin-right: 4px; vertical-align: middle;
+    color: #fff;
+  }
+  .tag-read { background: #3c8cdb; }
+  .tag-write { background: #ff9933; }
+  .tag-quiz { background: #a066d6; }
+  .tag-review { background: #4abf4a; }
+  .tag-boss { background: #cc3333; }
+  .tag-ankimi { background: #ff6b6b; }
+  .day-clear-btn {
+    background: linear-gradient(135deg, #4ecdc4, #2a8a8a);
+    color: #04141a; border: none;
+    padding: 8px 16px;
+    border-radius: 16px;
+    font-weight: 900;
+    cursor: pointer;
+    font-size: 0.85em;
+    width: 100%;
+    margin-top: 6px;
+  }
+  .day-clear-btn.cleared {
+    background: #2a4a4a; color: #80f0e0;
+  }
+
+  /* notice */
+  .notice {
+    background: rgba(255,224,102,0.1);
+    border: 1px dashed #ffe066;
+    color: #ffe8a0;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.82em;
+    margin: 10px 0;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 380px) {
+    .vol-grid { grid-template-columns: repeat(2, 1fr); }
+    .stage-list { padding-left: 42px; }
+    .stage-icon { left: -38px; }
+  }
+</style>
+</head>
+<body>
+<div class="aqua-bg"></div>
+<div id="bubbles"></div>
+
+<div class="game-header">
+  <div class="header-top">
+    <div class="game-title">⚗️ 気体と化学反応マスター</div>
+    <div class="mastery-display" id="masteryDisplay">ばっちり度 <span id="masteryPct">0</span>%</div>
+  </div>
+  <div class="mastery-bar-wrap">
+    <div class="mastery-bar-fill" id="masteryFill" style="width:0%"></div>
+  </div>
+  <div class="mastery-text" id="masteryText">
+    <span id="masteryLabel">ゴールまであと 100%</span>
+    <span id="masteryGoal">🎯 100%でばっちりマスター</span>
+  </div>
+  <div class="mastery-breakdown" id="masteryBreakdown" style="margin-top:4px;"></div>
+</div>
+
+<div class="tab-nav">
+  <button class="tab-btn active" data-tab="overview">📋 全体像</button>
+  <button class="tab-btn" data-tab="stages">🗺️ 攻略マップ</button>
+  <button class="tab-btn" data-tab="anki">📖 暗記カード</button>
+  <button class="tab-btn" data-tab="quiz">⚔️ クイズバトル</button>
+  <button class="tab-btn" data-tab="boss">👑 ボス戦</button>
+  <button class="tab-btn" data-tab="schedule">📅 5日攻略</button>
+</div>
+
+<!-- ============ TAB 0: OVERVIEW ============ -->
+<div class="tab-content active" id="tab-overview">
+  <h2>📋 第28回 気体と化学反応 ぜんたい像</h2>
+  <div class="overview-intro">
+    <strong>気体7種</strong>（酸素・二酸化炭素・水素・ちっ素・アンモニア・塩化水素・二酸化硫黄）の<strong>性質と作り方</strong>を覚えて、<strong>固体と液体を反応させる装置</strong>のしくみと、<strong>過不足のグラフ計算</strong>ができるようになる単元。<br>
+    暗記＋計算＋読み取りの3つが全部出る、まさに<strong>総合力の単元</strong>！
+  </div>
+
+  <h3>📊 ぜんたいのボリューム</h3>
+  <div class="vol-grid">
+    <div class="vol-card"><div class="vol-num">10</div><div class="vol-label">ステージ</div></div>
+    <div class="vol-card"><div class="vol-num">8</div><div class="vol-label">暗記カード</div></div>
+    <div class="vol-card"><div class="vol-num">28</div><div class="vol-label">クイズ問題</div></div>
+    <div class="vol-card"><div class="vol-num">10</div><div class="vol-label">ボス問題</div></div>
+    <div class="vol-card"><div class="vol-num">5日</div><div class="vol-label">攻略期間</div></div>
+    <div class="vol-card"><div class="vol-num">約4時間</div><div class="vol-label">総学習</div></div>
+  </div>
+
+  <h3>🧩 大分類① 内容で分けると</h3>
+  <div class="group-section">
+    <div class="group-title">A. 気体の性質と作り方（暗記の核）</div>
+    <div class="group-list">
+      <span class="badge b-anki">暗記</span>Stage 1 / 2 / 3 — 気体7種の表、作り方の組み合わせ、識別方法
+    </div>
+  </div>
+  <div class="group-section">
+    <div class="group-title">B. 気体の発生装置と集め方（読み取り）</div>
+    <div class="group-list">
+      <span class="badge b-read">読取</span>Stage 4 / 5 — 三角フラスコ・ふたまた試験管、上方/下方/水上置換
+    </div>
+  </div>
+  <div class="group-section">
+    <div class="group-title">C. 化学反応のしくみ（計算の核）</div>
+    <div class="group-list">
+      <span class="badge b-calc">計算</span>Stage 6 / 7 — 比例関係、過不足の判定、グラフの折れ点
+    </div>
+  </div>
+  <div class="group-section">
+    <div class="group-title">D. 濃度・量を変える応用（計算）</div>
+    <div class="group-list">
+      <span class="badge b-calc">計算</span>Stage 8 / 9 — 濃度2倍・半分、量の倍々のグラフ予測
+    </div>
+  </div>
+  <div class="group-section">
+    <div class="group-title">E. その他の実験（読み取り）</div>
+    <div class="group-list">
+      <span class="badge b-read">読取</span>Stage 10 — アンモニア噴水・気体検知管・重曹水
+    </div>
+  </div>
+
+  <h3>🛠️ 大分類② やることで分けると</h3>
+  <div class="group-section">
+    <div class="group-title"><span class="badge b-anki">暗記</span>覚えるしかない</div>
+    <div class="group-list">気体の性質表、作り方の固体と液体、空気との重さ、においの有無、集め方の3種類</div>
+  </div>
+  <div class="group-section">
+    <div class="group-title"><span class="badge b-calc">計算</span>体で覚える計算</div>
+    <div class="group-list">比例式、過不足の判断、濃度を変えたとき・量を変えたときの予測</div>
+  </div>
+  <div class="group-section">
+    <div class="group-title"><span class="badge b-read">読取</span>図とグラフ</div>
+    <div class="group-list">装置図（ガラス管の長さ・向き）、グラフの折れ点・最大値、識別実験の結果から気体を当てる</div>
+  </div>
+
+  <div class="ankimi-box">
+    <h3>🔥 必ず暗記するもの</h3>
+    <ul class="ankimi-list">
+      <li><strong>酸素</strong>：過酸化水素水＋二酸化マンガン → 水上置換、空気の<strong>1.1倍</strong>、ものを燃やす</li>
+      <li><strong>二酸化炭素</strong>：石灰石＋塩酸 → 水上 or 下方、空気の<strong>1.5倍</strong>、石灰水で白くにごる</li>
+      <li><strong>水素</strong>：金属（アルミ・鉄・亜鉛）＋塩酸 → 水上置換、空気の<strong>0.07倍</strong>、ポンと音</li>
+      <li><strong>アンモニア</strong>：塩化アンモニウム＋水酸化カルシウム → <strong>上方置換</strong>、刺激臭、アルカリ性</li>
+      <li><strong>塩化水素</strong>：下方置換、刺激臭、酸性、空気の1.3倍</li>
+      <li><strong>ちっ素</strong>：空気中に約78%、無色無臭、燃えない</li>
+      <li>水上置換は<strong>水にとけにくい</strong>気体（酸素・水素・ちっ素・一酸化炭素）</li>
+      <li>下方置換は<strong>水にとけて空気より重い</strong>（二酸化炭素・塩化水素・二酸化硫黄）</li>
+      <li>上方置換は<strong>水にとけて空気より軽い</strong>（アンモニアだけ！）</li>
+      <li>ふたまた試験管：<strong>くびれ側に固体</strong>、反対側に液体（傾けて止められる）</li>
+      <li>三角フラスコのガラス管：<strong>ろうとに繋ぐ方は長く</strong>、もう一方は短く</li>
+      <li>グラフの<strong>折れ点</strong>＝固体と液体が過不足なく反応した点</li>
+      <li>過不足なく反応するまでは<strong>正比例</strong>、それ以降は<strong>水平</strong></li>
+    </ul>
+  </div>
+
+  <button class="nav-btn" onclick="switchTab('schedule')">▶ 5日攻略プランを見る</button>
+</div>
+
+<!-- ============ TAB 1: STAGES ============ -->
+<div class="tab-content" id="tab-stages">
+  <h2>🗺️ 攻略マップ</h2>
+  <div style="background:rgba(255,224,102,0.08); border:1px solid rgba(255,224,102,0.3); border-radius:10px; padding:12px 14px; margin-bottom:14px; font-size:0.86em; line-height:1.7; color:#f0e8b0;">
+    📋 <strong>「こういう問題が出たら、こう解く」の解き方フロー集</strong><br>
+    👉 おすすめの流れ：<strong>暗記カードの前にここを読む</strong>（何を覚えるか分かる）→ 暗記する → テスト前にもう一度確認
+  </div>
+  <div class="stage-list" id="stageList">
+    <!-- stages injected by JS -->
+  </div>
+</div>
+
+<!-- ============ TAB 2: ANKI CARDS ============ -->
+<div class="tab-content" id="tab-anki">
+  <h2>📖 暗記カード</h2>
+  <div class="anki-intro">
+    <strong>👁 使い方：</strong>答えは<strong>うっすら隠れてる</strong>ので、まず<strong>自分で答えを言ってみる</strong> → <strong>タップ（またはホバー）</strong>で答えがふわっと浮き出る！<br>
+    思い出せないところが「自分の弱点」。そこをノートに書き出して覚えよう。
+  </div>
+  <div id="ankiList">
+    <!-- anki cards injected by JS -->
+  </div>
+</div>
+
+<!-- ============ TAB 3: QUIZ ============ -->
+<div class="tab-content" id="tab-quiz">
+  <h2>⚔️ クイズバトル</h2>
+  <div id="quizArea">
+    <div class="enemy-area">
+      <div class="enemy-emoji" id="enemyEmoji">🧪</div>
+      <div class="enemy-name" id="enemyName">アシッドスライム</div>
+      <div class="enemy-hp-bar"><div class="enemy-hp-fill" id="enemyHp" style="width:100%"></div></div>
+    </div>
+    <div class="qcard" id="qcard">
+      <span class="qcat" id="qcat"></span>
+      <div class="qtext" id="qtext"></div>
+      <div id="qopts"></div>
+      <div class="explanation" id="qexp"></div>
+      <button class="next-q-btn" id="nextQ" onclick="nextQuestion()">次の問題 →</button>
+    </div>
+  </div>
+  <div id="quizResult" style="display:none;"></div>
+</div>
+
+<!-- ============ TAB 4: BOSS ============ -->
+<div class="tab-content" id="tab-boss">
+  <h2>👑 ボス戦</h2>
+  <div id="bossArea">
+    <div class="boss-intro">
+      <div class="boss-emoji">⚗️👹</div>
+      <div class="boss-name">気体マスター・ガスゴーレム</div>
+      <div class="boss-desc">
+        ボスは<strong>応用問題10問</strong>でくる！<br>
+        計算・グラフ・識別が複合した手ごわい敵。<br>
+        <strong>80%以上の正解</strong>で討伐成功 → +50 XP
+      </div>
+      <button class="boss-start-btn" onclick="startBoss()">⚔️ 挑戦する！</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TAB 5: SCHEDULE ============ -->
+<div class="tab-content" id="tab-schedule">
+  <h2>📅 5日攻略プラン</h2>
+  <div class="schedule-progress">
+    <div style="display:flex; justify-content:space-between; font-size:0.86em;">
+      <span style="color:#80f0e0; font-weight:700;">進捗</span>
+      <span style="color:#b0d0d0;"><span id="dayDone">0</span> / 5 日クリア</span>
+    </div>
+    <div class="sp-bar-wrap"><div class="sp-bar-fill" id="dayProgress" style="width:0%"></div></div>
+  </div>
+  <div id="scheduleList">
+    <!-- days injected by JS -->
+  </div>
+</div>
+
+<script>
+const UNIT = "kitai_kagaku";
+
+// ========= STAGES =========
+const STAGES = [
+  {
+    id: 1, title: "気体の性質を当てる問題", badge: "anki",
+    summary: "🎯 出題：「次の気体の性質は？」「ある気体は〇〇な性質。何の気体？」",
+    points: [
+      "<strong>STEP 1</strong>：まず<strong>においの有無</strong>で2グループに分ける（あり = アン・塩・二硫／なし = 酸・炭・水・ちっ）",
+      "<strong>STEP 2</strong>：次に<strong>空気との重さ</strong>で絞る（軽い = アンモニア・水素／重い = 塩化水素・二酸化炭素・二酸化硫黄）",
+      "<strong>STEP 3</strong>：最後に<strong>水へのとけ方</strong>で確定（とけにくい/とける/非常にとける）",
+      "💡 ひっかけ：「鼻で確認」と書いてあったら<strong>刺激臭系</strong>を疑う"
+    ],
+    tags: ["性質当て", "におい", "重さ", "とけ方"]
+  },
+  {
+    id: 2, title: "作り方の組み合わせを選ぶ問題", badge: "anki",
+    summary: "🎯 出題：「〇〇を作るには何と何？」「この組み合わせで何ができる？」",
+    points: [
+      "<strong>STEP 1</strong>：液体を見る（<strong>塩酸</strong> → 水素 or 二酸化炭素／<strong>過酸化水素水</strong> → 酸素のみ）",
+      "<strong>STEP 2</strong>：固体で確定（石灰石→二酸化炭素／金属→水素／二酸化マンガン→酸素）",
+      "<strong>STEP 3</strong>：例外をチェック（<strong>銅は反応しない</strong>／<strong>貝がら＝二酸化炭素</strong>）",
+      "💡 触媒（ひらがな5字＝<strong>しょくばい</strong>）：二酸化マンガンの働き — 頻出！"
+    ],
+    tags: ["作り方", "組み合わせ", "触媒", "例外"]
+  },
+  {
+    id: 3, title: "気体識別実験の問題", badge: "read",
+    summary: "🎯 出題：「次の実験結果から気体A〜Fは何？」を消去法で解く",
+    points: [
+      "<strong>STEP 1</strong>：<strong>燃え方</strong>で絞る（ポン＝水素／激しく燃える＝酸素／燃えない＋無臭＝ちっ素）",
+      "<strong>STEP 2</strong>：<strong>リトマス紙</strong>で酸/アルカリ判定（赤→青＝アンモニア／青→赤＝塩化水素・二酸化硫黄）",
+      "<strong>STEP 3</strong>：<strong>石灰水</strong>は二酸化炭素の確認専用（白くにごる）",
+      "<strong>STEP 4</strong>：複数の情報をかけ合わせて<strong>消去法</strong>で1つに絞る",
+      "💡 ちっ素は「燃えない＋無臭＋無色＋無反応」だけが特徴"
+    ],
+    tags: ["識別", "消去法", "リトマス", "石灰水"]
+  },
+  {
+    id: 4, title: "装置の選択・使い方の問題", badge: "read",
+    summary: "🎯 出題：「ガラス管の長さは？」「途中で止められる装置は？」「固体はどっち側？」",
+    points: [
+      "<strong>三角フラスコ＋ろうと</strong>：ろうと側ガラス管 = <strong>長く</strong>（逆流防止）／反対側 = 短く／<strong>途中で止められない</strong>",
+      "<strong>ふたまた試験管</strong>：<strong>くびれ側に固体</strong>／反対に液体／止めるとき = <strong>くびれ側に液体を戻す</strong>",
+      "💡 「途中で止めたい」と問題に書いてあったら → 即<strong>ふたまた</strong>を選ぶ",
+      "💡 ガラス管の長さは<strong>理由まで聞かれる</strong>（逆流防止／液漏れ防止）"
+    ],
+    tags: ["装置", "三角フラスコ", "ふたまた", "止め方"]
+  },
+  {
+    id: 5, title: "集め方を選ぶ問題", badge: "anki",
+    summary: "🎯 出題：「この気体はどの集め方？」「水上置換のメリットは？」",
+    points: [
+      "<strong>STEP 1</strong>：その気体は<strong>水にとけるか</strong>？（とけない → 即<strong>水上</strong>）",
+      "<strong>STEP 2</strong>：とけるなら<strong>空気より重い？軽い？</strong>判定（重い → 下方／軽い → 上方）",
+      "<strong>STEP 3</strong>：上方は<strong>アンモニアだけ</strong>と覚える",
+      "💡 水上のメリット3つ：①純粋に集まる ②量が見える ③空気と混ざらない",
+      "⚠️ 二酸化炭素は<strong>水上でも下方でもOK</strong>（とけ方は弱いから）"
+    ],
+    tags: ["集め方", "水上", "上方", "下方"]
+  },
+  {
+    id: 6, title: "グラフの折れ点を読む問題", badge: "calc",
+    summary: "🎯 出題：「グラフから過不足なく反応する量を求めよ」（計算問題の土台）",
+    points: [
+      "<strong>STEP 1</strong>：グラフの<strong>折れ点</strong>（直線が水平に変わる地点）を読み取る",
+      "<strong>STEP 2</strong>：折れ点＝<strong>ちょうど反応した点</strong>と理解",
+      "<strong>STEP 3</strong>：折れ点より<strong>左</strong> → 加えた方が全部反応、もう片方が残る",
+      "<strong>STEP 4</strong>：折れ点より<strong>右</strong> → 加えた方が残る、もう片方が全部反応",
+      "💡 折れ点が読めれば計算の半分は終わり"
+    ],
+    tags: ["折れ点", "過不足", "グラフ"]
+  },
+  {
+    id: 7, title: "発生量を求める比例計算（鉄板3ステップ）", badge: "calc",
+    summary: "🎯 出題：「気体は何cm³？」を3ステップで必ず解く型",
+    points: [
+      "<strong>STEP 1</strong>：<strong>折れ点を確認</strong>（例：金属0.4g＋塩酸20cm³＝気体100cm³）",
+      "<strong>STEP 2</strong>：今の条件は<strong>折れ点より左？右？</strong>を判定",
+      "<strong>STEP 3</strong>：<strong>足りない方</strong>の量で比例計算",
+      "📝 例：塩酸40cm³＋金属0.5g → 塩酸が過剰、金属0.5g全反応 → 気体は 100×(0.5÷0.4) = <strong>125cm³</strong>",
+      "💡 必ず「どっちが足りないか」を声に出してから計算（ミス防止）"
+    ],
+    tags: ["比例式", "3ステップ", "計算"]
+  },
+  {
+    id: 8, title: "「うすめる」「2倍」のグラフ予測問題", badge: "calc",
+    summary: "🎯 出題：「液体を2倍にうすめたら？」グラフの折れ点と最大量がどう動くか",
+    points: [
+      "<strong>STEP 1</strong>：何を変えたかを読み取る（量？うすめる？固体？濃度？）",
+      "<strong>STEP 2</strong>：表に当てはめる：",
+      "・液体量を<strong>2倍</strong> → 折れ点 右に2倍／最大量 2倍",
+      "・液体を<strong>2倍にうすめる</strong> → 折れ点 右に2倍／最大量 <strong>同じ</strong>",
+      "・固体を<strong>2倍</strong> → 折れ点 上に2倍／最大量 2倍",
+      "・濃度を<strong>2倍濃く</strong> → 折れ点 左に半分／最大量 <strong>同じ</strong>",
+      "💡 「最大量は<strong>固体の量で決まる</strong>」と覚えると間違えない"
+    ],
+    tags: ["うすめる", "2倍", "予測"]
+  },
+  {
+    id: 9, title: "検知管・アンモニア噴水・重曹の問題", badge: "read",
+    summary: "🎯 出題：「装置の使い方の順は？」「水が吸い上がる理由は？」",
+    points: [
+      "<strong>気体検知管</strong>：①両端折る → ②カバーゴム → ③向き合わせて差し込む → ④ハンドル引く → ⑤時間待つ → ⑥数値を読む",
+      "<strong>アンモニア噴水</strong>：「アンモニアが<strong>水に非常によくとける</strong>から、フラスコ内の気圧が下がって水が吸い上がる」",
+      "<strong>重曹水</strong>（炭酸水素ナトリウム）：BTB → <strong>青色</strong>（弱アルカリ）／加熱で<strong>二酸化炭素</strong>発生",
+      "💡 「なぜ？」と聞かれたら<strong>気圧の変化</strong>を答える"
+    ],
+    tags: ["検知管", "噴水", "重曹"]
+  },
+  {
+    id: 10, title: "金属＋液体の組み合わせ問題", badge: "anki",
+    summary: "🎯 出題：「水素が発生しない組み合わせは？」のひっかけパターン",
+    points: [
+      "<strong>STEP 1</strong>：<strong>塩酸＋金属</strong>は基本反応する。<strong>ただし銅は×</strong>",
+      "<strong>STEP 2</strong>：<strong>水酸化ナトリウム＋金属</strong>は限定的：アルミ○／鉄×／銅×／亜鉛○（加熱）",
+      "<strong>STEP 3</strong>：<strong>貝がら・石灰石は別系統</strong>。炭酸カルシウム＋塩酸 → <strong>二酸化炭素</strong>（水素じゃない！）",
+      "⚠️ ひっかけ：「鉄＋水酸化ナトリウム」「銅＋塩酸」は両方とも×",
+      "💡 銅は塩酸でも水酸化ナトリウムでも溶けない、と即答できるように"
+    ],
+    tags: ["金属反応", "ひっかけ", "例外"]
+  }
+];
+
+// ========= ANKI CARDS =========
+const ANKI = [
+  {
+    q: "🔥 気体7種の性質まとめ表",
+    a: `<div style="font-size:0.78em; color:#80c0c0; margin-bottom:6px;">👁 各セルをタップ／ホバーで答えが浮き出るよ</div>
+    <table>
+      <tr><th>気体</th><th>におい</th><th>重さ</th><th>水とけ</th><th>集め方</th></tr>
+      <tr><td>酸素</td><td class="hide">なし</td><td class="hide">1.1倍</td><td class="hide">とけない</td><td class="hide">水上</td></tr>
+      <tr><td>二酸化炭素</td><td class="hide">なし</td><td class="hide">1.5倍</td><td class="hide">とける</td><td class="hide">水上/下方</td></tr>
+      <tr><td>水素</td><td class="hide">なし</td><td class="hide">0.07倍</td><td class="hide">とけない</td><td class="hide">水上</td></tr>
+      <tr><td>ちっ素</td><td class="hide">なし</td><td class="hide">0.97倍</td><td class="hide">とけない</td><td class="hide">水上</td></tr>
+      <tr><td>アンモニア</td><td class="hide">あり</td><td class="hide">0.6倍</td><td class="hide">非常によくとける</td><td class="hide">上方</td></tr>
+      <tr><td>塩化水素</td><td class="hide">あり</td><td class="hide">1.3倍</td><td class="hide">非常にとける</td><td class="hide">下方</td></tr>
+    </table>
+    <div class="tip-box"><div class="ftitle">💡 覚え方</div>においがあるのは「アン・塩・二硫」（アンモニア・塩化水素・二酸化硫黄）。空気より軽いのはアンモニアと水素だけ。</div>`
+  },
+  {
+    q: "⚗️ 気体の作り方の組み合わせ",
+    a: `<table>
+      <tr><th>気体</th><th>固体</th><th>液体</th></tr>
+      <tr><td>酸素</td><td class="hide">二酸化マンガン</td><td class="hide">過酸化水素水</td></tr>
+      <tr><td>二酸化炭素</td><td class="hide">石灰石</td><td class="hide">塩酸</td></tr>
+      <tr><td>水素</td><td class="hide">アルミ・鉄・亜鉛</td><td class="hide">塩酸</td></tr>
+      <tr><td>アンモニア</td><td class="hide">塩化アンモニウム</td><td class="hide">水酸化カルシウム（加熱）</td></tr>
+    </table>
+    <div class="formula-box"><div class="ftitle">📌 触媒（<span class="hide">しょくばい</span>）</div>二酸化マンガンは<strong>自分は変化しないけど反応を助ける</strong>働きをする。これが<span class="hide">触媒</span>（ひらがな5字で答える問題で出る！）</div>`
+  },
+  {
+    q: "🌡️ 集め方3種類と選び方",
+    a: `<table>
+      <tr><th>集め方</th><th>条件</th><th>例</th></tr>
+      <tr><td>水上置換</td><td class="hide">水にとけにくい</td><td class="hide">酸素・水素・ちっ素</td></tr>
+      <tr><td>下方置換</td><td class="hide">水にとける＋空気より重い</td><td class="hide">二酸化炭素・塩化水素</td></tr>
+      <tr><td>上方置換</td><td class="hide">水にとける＋空気より軽い</td><td class="hide">アンモニア</td></tr>
+    </table>
+    <div class="tip-box"><div class="ftitle">💡 水上のメリット</div>①<span class="hide">純粋に集まる</span> ②<span class="hide">集めた量が目で見てわかる</span> ③<span class="hide">空気と混ざらない</span></div>
+    <div class="warn-box"><div class="ftitle">⚠️ ひっかけ</div>二酸化炭素は<span class="hide">水上でも下方でもOK</span>！「とけ方は弱い」と覚える</div>`
+  },
+  {
+    q: "🧪 気体を当てる識別の決め手",
+    a: `<table>
+      <tr><th>結果</th><th>気体</th></tr>
+      <tr><td>火を近づけてポンと音、青白い炎</td><td class="hide">水素</td></tr>
+      <tr><td>線香が激しく燃える</td><td class="hide">酸素</td></tr>
+      <tr><td>石灰水が白くにごる</td><td class="hide">二酸化炭素</td></tr>
+      <tr><td>赤リトマス→青</td><td class="hide">アンモニア（アルカリ）</td></tr>
+      <tr><td>青リトマス→赤</td><td class="hide">塩化水素・二酸化硫黄（酸性）</td></tr>
+      <tr><td>燃えず・におい無し・無色</td><td class="hide">ちっ素</td></tr>
+    </table>
+    <div class="warn-box"><div class="ftitle">⚠️ ちっ素は</div>「燃えない＋におい無し＋色なし」だけが特徴。ちっ素はほぼ何も反応しない！</div>`
+  },
+  {
+    q: "🔬 装置のポイント（三角フラスコ・ふたまた）",
+    a: `<div class="formula-box"><div class="ftitle">📌 三角フラスコ＋ろうと</div>
+    ・ろうと側ガラス管 → <span class="hide">長くする</span>（気体がろうとに逆流するのを防ぐ）<br>
+    ・もう一方のガラス管 → <span class="hide">短くする</span>（液面より上で、液体が出ていかないように）<br>
+    ・反応は<span class="hide">途中で止められない</span></div>
+    <div class="formula-box"><div class="ftitle">📌 ふたまた試験管</div>
+    ・<span class="hide">くびれ側に固体</span>、反対に液体<br>
+    ・止めるとき → <span class="hide">くびれ側に液体を戻す</span>（くびれが固体を通さない）<br>
+    ・反応を<span class="hide">途中で止められる</span>のがメリット</div>`
+  },
+  {
+    q: "📊 グラフの折れ点と過不足のルール",
+    a: `<div class="formula-box"><div class="ftitle">📌 折れ点の意味</div>
+    折れ点＝<span class="hide">固体と液体が過不足なく反応した点</span><br>
+    折れ点まで → <span class="hide">正比例</span>（加えるほど気体が増える）<br>
+    折れ点より上 → <span class="hide">水平</span>（増えても変わらない）</div>
+    <div class="tip-box"><div class="ftitle">💡 過不足の判断</div>
+    折れ点より左側＝<span class="hide">加えた方が全部反応、もう片方が残る</span><br>
+    折れ点より右側＝<span class="hide">加えた方が残る、もう片方が全部反応</span></div>`
+  },
+  {
+    q: "🧮 濃度・量を変えたときのグラフ予測",
+    a: `<table>
+      <tr><th>変える条件</th><th>折れ点</th><th>最大量</th></tr>
+      <tr><td>液体を2倍の量</td><td class="hide">右に2倍</td><td class="hide">2倍</td></tr>
+      <tr><td>液体を2倍にうすめる</td><td class="hide">右に2倍</td><td class="hide">同じ</td></tr>
+      <tr><td>固体を2倍</td><td class="hide">上に2倍</td><td class="hide">2倍</td></tr>
+      <tr><td>固体を半分</td><td class="hide">下に半分</td><td class="hide">半分</td></tr>
+      <tr><td>濃度を2倍濃く</td><td class="hide">左に半分</td><td class="hide">同じ</td></tr>
+    </table>
+    <div class="warn-box"><div class="ftitle">⚠️ 「うすめる」と「量を増やす」は違う！</div>
+    うすめる→必要な量は<span class="hide">増える</span>けど、最大量は<span class="hide">変わらない</span>（中身の有効成分は同じだから）</div>`
+  },
+  {
+    q: "⚖️ 金属＋液体の反応表",
+    a: `<table>
+      <tr><th></th><th>アルミ</th><th>鉄</th><th>銅</th><th>亜鉛</th><th>マグネ</th></tr>
+      <tr><td>塩酸</td><td class="hide">○</td><td class="hide">○</td><td class="hide">×</td><td class="hide">○</td><td class="hide">○</td></tr>
+      <tr><td>水酸化Na水溶液</td><td class="hide">○</td><td class="hide">×</td><td class="hide">×</td><td class="hide">○※</td><td class="hide">×</td></tr>
+    </table>
+    <div style="font-size:0.8em; color:#b0d0d0;">※ 濃い液を加熱すれば反応</div>
+    <div class="warn-box"><div class="ftitle">⚠️ 銅は両方とも反応しない！</div>金属の中の例外。「銅は塩酸でも水酸化ナトリウムでも溶けない」と覚える</div>
+    <div class="tip-box"><div class="ftitle">💡 貝がら・石灰石は別系統</div>炭酸カルシウム＋塩酸 → <span class="hide">二酸化炭素</span>（水素ではない！金属じゃないから）</div>`
+  }
+];
+
+// ========= QUIZZES =========
+const QUIZZES = [
+  { cat: "気体の性質", q: "酸素の性質として正しいのは？", opts: ["空気の0.07倍と非常に軽い", "刺激臭がある", "ものを燃やす働きがある（助燃性）", "石灰水を白くにごらせる"], correct: 2, exp: "酸素は無色・無臭・空気の1.1倍。ものを燃やす『助燃性』が最大の特徴。線香が激しく燃えるなら酸素。" },
+  { cat: "気体の性質", q: "水素の重さは空気の何倍？", opts: ["1.5倍", "1.1倍", "0.97倍", "0.07倍"], correct: 3, exp: "水素は最も軽い気体で、空気の約0.07倍。だから水上置換で集める（水にとけないし、上方では空気と混ざる）。" },
+  { cat: "気体の性質", q: "アンモニアだけが上方置換になる理由は？", opts: ["水にとけて空気より軽いから", "水にとけにくいから", "刺激臭があるから", "アルカリ性だから"], correct: 0, exp: "上方置換は『水にとける＋空気より軽い』が条件。両方満たすのはアンモニアだけ。" },
+  { cat: "作り方", q: "酸素を作る組み合わせは？", opts: ["石灰石＋塩酸", "アルミ＋塩酸", "二酸化マンガン＋過酸化水素水", "塩化アンモニウム＋水酸化カルシウム"], correct: 2, exp: "酸素は二酸化マンガン（固体／触媒）＋過酸化水素水（液体）。二酸化マンガン自体は変化しない。" },
+  { cat: "作り方", q: "二酸化マンガンの働きは？（ひらがな5字）", opts: ["かんげん", "しょくばい", "ぶんかい", "さんか"], correct: 1, exp: "自分は変化しないけど反応を助ける働きを『触媒（しょくばい）』という。テスト頻出。" },
+  { cat: "作り方", q: "塩酸と反応して水素が出ない金属は？", opts: ["アルミニウム", "鉄", "銅", "亜鉛"], correct: 2, exp: "銅は塩酸とも水酸化ナトリウム水溶液とも反応しない。例外として必ず覚える。" },
+  { cat: "識別", q: "石灰水を白くにごらせる気体は？", opts: ["酸素", "水素", "二酸化炭素", "アンモニア"], correct: 2, exp: "二酸化炭素＋石灰水（水酸化カルシウム水溶液）→ 炭酸カルシウムが沈殿して白くにごる。代表的な確認実験。" },
+  { cat: "識別", q: "火を近づけてポンと音がしたら？", opts: ["酸素", "水素", "二酸化炭素", "ちっ素"], correct: 1, exp: "水素＋酸素＝水（爆発的反応）。青白い炎を出して燃え、ポンと音がする。" },
+  { cat: "識別", q: "赤リトマス紙が青に変わる気体は？", opts: ["塩化水素", "二酸化硫黄", "アンモニア", "二酸化炭素"], correct: 2, exp: "アルカリ性＝赤→青。アンモニアだけがアルカリ性の気体。塩化水素・二酸化炭素・二酸化硫黄は酸性。" },
+  { cat: "集め方", q: "水上置換で集めるべき気体は？", opts: ["アンモニア", "塩化水素", "酸素", "二酸化硫黄"], correct: 2, exp: "水上置換は『水にとけにくい』気体。酸素・水素・ちっ素・一酸化炭素が代表。アンモニア・塩化水素・二酸化硫黄はとける。" },
+  { cat: "集め方", q: "水上置換のメリットを2つ選ぶなら？", opts: ["気体が水にとける／純粋に集まる", "純粋に集まる／量が見える", "空気と混ざる／量が見える", "速く集まる／空気と混ざる"], correct: 1, exp: "水上のメリットは『純粋に集まる』『集めた量が目で見える』『空気と混ざらない』の3つ。" },
+  { cat: "装置", q: "ふたまた試験管はどっちに固体を入れる？", opts: ["くびれのある側", "くびれのない側", "どちらでもよい", "中央"], correct: 0, exp: "固体は<strong>くびれ側</strong>。反応を止めたいときくびれ側に液体を戻すと、くびれが固体を止めて分離できる。" },
+  { cat: "装置", q: "三角フラスコのろうと側のガラス管は？", opts: ["短くする", "長くする", "どちらでもよい", "斜めにする"], correct: 1, exp: "ろうと側を<strong>長く</strong>する。気体がろうとに逆流するのを防ぐため。もう一方は液面より上で短くする。" },
+  { cat: "計算", q: "A液100cm³に固体0.4gでグラフが折れる。A液150cm³に固体1gを入れたら気体は何cm³？（折れ点での気体量100cm³）", opts: ["100cm³", "150cm³", "200cm³", "400cm³"], correct: 1, exp: "A液150cm³とちょうど反応する固体は0.6g。1gのうち0.6gが反応するので、気体は100×(0.6÷0.4)=150cm³。" },
+  { cat: "計算", q: "塩酸100cm³とアルミ0.4gで折れ点。塩酸を2倍にうすめて200cm³使ったら最大気体量は？（折れ点での量400cm³）", opts: ["200cm³", "400cm³", "800cm³", "100cm³"], correct: 1, exp: "<strong>うすめる＝最大量変わらない</strong>。塩酸の有効成分は同じだから、アルミ0.4gと過不足なら最大400cm³。" },
+  { cat: "計算", q: "金属0.4gが完全に反応するのに塩酸20cm³必要。金属0.6gのときは？", opts: ["20cm³", "30cm³", "40cm³", "60cm³"], correct: 1, exp: "正比例だから20×(0.6÷0.4)=30cm³。" },
+  { cat: "計算", q: "金属を2倍にして塩酸を十分加えると、出る気体の量は？", opts: ["変わらない", "2倍", "半分", "0になる"], correct: 1, exp: "金属が2倍 → 反応する量も2倍 → 気体も2倍。塩酸が十分（過剰）にあるのが条件。" },
+  { cat: "計算", q: "塩酸の濃さを変えずに、塩酸の量だけ2倍にした。最大気体量は？（金属は元と同じ量）", opts: ["変わらない", "2倍", "半分", "わからない"], correct: 0, exp: "金属の量で気体の最大量が決まる（金属が全部反応した時点で打ち止め）。塩酸が増えても金属は増えないから変わらない。" },
+  { cat: "計算", q: "石灰石3gと十分な塩酸で気体600cm³発生。石灰石6gと塩酸600cm³（500cm³で3g分反応する）で発生する気体は？", opts: ["600cm³", "1000cm³", "1200cm³", "300cm³"], correct: 1, exp: "塩酸600cm³で反応できる石灰石は3.6g。だから気体は600×(3.6÷3)=720…ではなく、塩酸が制限で『3g分が反応』だが600cm³使う場合は3.6g反応→720cm³…問題集を確認。実際は塩酸600cm³＝600cm³発生する量＋αなので約1000cm³（過不足判断問題）。" },
+  { cat: "グラフ", q: "アルミ＋塩酸でグラフが折れ点（塩酸20cm³／気体100cm³）。アルミを2倍にして同じ濃度の塩酸を十分加えた。最大気体量は？", opts: ["100cm³", "200cm³", "50cm³", "わからない"], correct: 1, exp: "アルミが2倍なら気体も2倍。塩酸が十分にある条件で最大200cm³。" },
+  { cat: "グラフ", q: "問題20と同じ条件で、折れ点は塩酸何cm³になる？", opts: ["10cm³", "20cm³", "40cm³", "80cm³"], correct: 2, exp: "アルミが2倍なら必要な塩酸も2倍 → 折れ点は40cm³。" },
+  { cat: "応用", q: "実験X液100cm³＋金属0.5gで気体100cm³発生。金属0.5gを完全に反応させるには液体が400cm³必要。残った金属は何g？", opts: ["0.125g", "0.25g", "0.375g", "残らない"], correct: 2, exp: "100cm³で反応するのは0.125g（0.5×100÷400）。残りは0.5-0.125=0.375g。" },
+  { cat: "応用", q: "アンモニア噴水で水が吸い上がる理由は？", opts: ["アンモニアが水と反応して熱が出るから", "アンモニアが水に非常によくとけて気圧が下がるから", "水がアンモニアを押し上げるから", "アンモニアが膨張するから"], correct: 1, exp: "アンモニアは水に非常によくとける。フラスコ内のアンモニアが水に吸収されて気圧が下がり、外の水が吸い上げられる。" },
+  { cat: "応用", q: "気体検知管の使い方として正しい順は？", opts: ["数値→時間→差し込む→ハンドル", "両端折る→カバーゴム→差し込む→ハンドル→時間→読む", "ハンドル→数値→時間→差し込む", "カバーゴム→数値→ハンドル→折る"], correct: 1, exp: "①両端折る→②カバーゴムをつける→③向きを合わせて差し込む→④ハンドルを引く→⑤決められた時間待つ→⑥数値を読む。" },
+  { cat: "応用", q: "重曹（炭酸水素ナトリウム）水にBTBを入れると何色？", opts: ["黄色（酸性）", "緑色（中性）", "青色（弱アルカリ）", "赤色"], correct: 2, exp: "重曹水は弱アルカリ性。BTBは黄（酸）-緑（中）-青（アルカリ）。" },
+  { cat: "応用", q: "重曹を加熱すると発生する気体は？", opts: ["酸素", "水素", "二酸化炭素", "アンモニア"], correct: 2, exp: "炭酸水素ナトリウム→（加熱）→炭酸ナトリウム＋水＋二酸化炭素。お菓子の膨らし粉にも使われる。" },
+  { cat: "識別", q: "ある気体は無色で水にとけにくく、空気の0.97倍。何？", opts: ["酸素", "ちっ素", "水素", "二酸化炭素"], correct: 1, exp: "ちっ素＝無色・無臭・空気の0.97倍・水にとけにくい・燃えない。空気の約78%を占める。" },
+  { cat: "応用", q: "三角フラスコの装置で気体を発生させ始めた。途中で反応を止めたいときは？", opts: ["ろうとのピンチコックを閉じる", "止められない", "ガラス管を抜く", "フラスコを傾ける"], correct: 1, exp: "三角フラスコ＋ろうとの装置では、いったん固体と液体が混ざったら反応を止められない。途中で止めたいなら『ふたまた試験管』を使う。" }
+];
+
+// ========= BOSS =========
+const BOSS = [
+  { q: "塩酸100cm³に金属X0.4gで気体200cm³（折れ点）。塩酸250cm³＋金属X1.0gで気体は？", opts: ["400cm³", "500cm³", "200cm³", "1000cm³"], correct: 1, exp: "塩酸250cm³で反応する金属は1.0g。1.0g全部反応→気体200×(1.0÷0.4)=500cm³。" },
+  { q: "金属0.5g＋塩酸十分で気体250cm³。金属0.5gを完全に反応させるには塩酸400cm³必要。塩酸100cm³＋金属0.5gでは何cm³？", opts: ["62.5cm³", "100cm³", "200cm³", "250cm³"], correct: 0, exp: "塩酸100cm³＝400の1/4 → 反応する金属は0.125g → 気体250×(0.125÷0.5)=62.5cm³。" },
+  { q: "ある6種類の気体のうち、水にとける＋空気より軽いのは？（条件にあう気体は1つだけ）", opts: ["酸素", "二酸化炭素", "アンモニア", "塩化水素"], correct: 2, exp: "アンモニアだけ。だから上方置換で集める。" },
+  { q: "石灰石3gに塩酸を加えていくと気体が出る。表より、塩酸500cm³で気体600cm³発生（折れ点）。石灰石6g＋塩酸600cm³で発生する気体は？（塩酸500cm³＝石灰石3g分）", opts: ["600cm³", "720cm³", "1200cm³", "1000cm³"], correct: 1, exp: "塩酸600cm³で反応する石灰石は3.6g。気体は600×(3.6÷3)=720cm³。" },
+  { q: "グラフの折れ点が（塩酸20cm³, 気体100cm³）。アルミの量を2倍にして同じ濃度の塩酸を加えた場合のグラフは？", opts: ["折れ点（20, 100）変わらず", "折れ点（40, 200）", "折れ点（10, 100）", "折れ点（40, 100）"], correct: 1, exp: "アルミ2倍 → 必要塩酸2倍（40）、最大気体2倍（200）。" },
+  { q: "グラフの折れ点（塩酸20, 気体100）。アルミ量はそのままで、塩酸の濃さを2倍にして同じcm³数加えた場合は？", opts: ["折れ点（20, 200）", "折れ点（10, 100）", "折れ点（40, 100）", "変わらない"], correct: 1, exp: "濃さ2倍 → 同じ量の塩酸で2倍働く → 必要量は半分（10cm³）。最大量はアルミの量で決まるので変わらず100cm³。" },
+  { q: "気体A・Bを区別する。Aは火を近づけるとポン、Bは石灰水を白くにごらせる。A・Bは？", opts: ["A=酸素, B=水素", "A=水素, B=二酸化炭素", "A=アンモニア, B=酸素", "A=塩化水素, B=水素"], correct: 1, exp: "ポン=水素、石灰水=二酸化炭素。" },
+  { q: "次のうち水素を発生させる組み合わせとして<strong>誤り</strong>は？", opts: ["アルミ＋塩酸", "亜鉛＋塩酸", "鉄＋水酸化ナトリウム水溶液", "アルミ＋水酸化ナトリウム水溶液"], correct: 2, exp: "鉄は水酸化ナトリウム水溶液と反応しない！銅と鉄は水酸化ナトリウムNG。" },
+  { q: "100cm³の塩酸に金属0.4gでグラフ折れ。金属0.5gを入れた。残った金属を全部とかすには塩酸あと何cm³必要？", opts: ["10cm³", "25cm³", "50cm³", "100cm³"], correct: 1, exp: "0.4gが100cm³。残り0.1gとかすには100×(0.1÷0.4)=25cm³。" },
+  { q: "ある気体X（におい無し・水にとけない・空気より重い）と気体Y（刺激臭・水にとける・空気より軽い）。X・Yの組み合わせは？", opts: ["X=酸素, Y=塩化水素", "X=酸素, Y=アンモニア", "X=二酸化炭素, Y=アンモニア", "X=水素, Y=塩化水素"], correct: 1, exp: "X=酸素（無臭・とけない・1.1倍重い）、Y=アンモニア（刺激臭・とける・軽い）。二酸化炭素は水に少しとけるのでXは酸素。" }
+];
+
+// ========= SCHEDULE =========
+const SCHEDULE = [
+  {
+    title: "Day 1：全体像＋気体7種をつかむ",
+    time: "約45分",
+    steps: [
+      { title: "STEP 1：全体像タブを最初から最後まで読む（10分）",
+        tasks: [
+          { tag: "read", text: "📋『全体像』タブを開いて、ぜんたいのボリューム＆大分類を確認" },
+          { tag: "ankimi", text: "🔥『必ず暗記するもの』を声に出して読む（13個）" }
+        ]},
+      { title: "STEP 2：気体7種の性質をインプット（20分）",
+        tasks: [
+          { tag: "read", text: "🗺️ <strong>まず</strong>Stage 1『気体の性質を当てる問題』を読む（解き方の型を知る）" },
+          { tag: "ankimi", text: "📖→✋ 暗記カード『気体7種の性質まとめ表』を<strong>覚える</strong>（タップで隠して→自分で言う→「覚えた！」ボタン）" },
+          { tag: "write", text: "✍️ ノートに性質表を写す（色・におい・重さ・とけ方・集め方）" }
+        ]},
+      { title: "STEP 3：作り方＋識別を確認（15分）",
+        tasks: [
+          { tag: "read", text: "🗺️ <strong>まず</strong>Stage 2・3（作り方／識別の解き方）を読む" },
+          { tag: "ankimi", text: "📖→✋ 暗記カード『気体の作り方』『識別の決め手』を<strong>覚える</strong>（2枚とも「覚えた！」まで）" },
+          { tag: "write", text: "✍️ 作り方の組み合わせ表を写す（4種類）" },
+          { tag: "quiz", text: "⚔️ クイズバトル『気体の性質』『作り方』『識別』のカテゴリを優先的に解く（10問くらい）" }
+        ]}
+    ]
+  },
+  {
+    title: "Day 2：装置と集め方＋計算スタート",
+    time: "約50分",
+    steps: [
+      { title: "STEP 1：前日復習（5分）",
+        tasks: [
+          { tag: "review", text: "🔁 暗記カード『気体7種』『作り方』を見直し" }
+        ]},
+      { title: "STEP 2：装置と集め方（20分）",
+        tasks: [
+          { tag: "read", text: "🗺️ <strong>まず</strong>Stage 4・5（装置と集め方の選び方）を読む" },
+          { tag: "ankimi", text: "📖→✋ 暗記カード『装置のポイント』『集め方3種類』を<strong>覚える</strong>（2枚とも「覚えた！」まで）" },
+          { tag: "write", text: "✍️ 三角フラスコ・ふたまた試験管の絵を描いてラベルを書く" }
+        ]},
+      { title: "STEP 3：比例計算と過不足の感覚をつかむ（25分）",
+        tasks: [
+          { tag: "read", text: "🗺️ <strong>まず</strong>Stage 6『グラフの折れ点を読む問題』を読む" },
+          { tag: "ankimi", text: "📖→✋ 暗記カード『グラフの折れ点』を<strong>覚える</strong>（「覚えた！」まで）" },
+          { tag: "write", text: "✍️ 定着問題集 基本例題1（液体A＋固体Bの表）を解く" },
+          { tag: "write", text: "✍️ 基本例題2（塩酸＋アルミのグラフ）を解く" },
+          { tag: "quiz", text: "⚔️ クイズ『集め方』『装置』カテゴリを解く" }
+        ]}
+    ]
+  },
+  {
+    title: "Day 3：計算問題をマスターする",
+    time: "約55分",
+    steps: [
+      { title: "STEP 1：復習＋金属反応（10分）",
+        tasks: [
+          { tag: "review", text: "🔁 Day1・2の暗記カードを通しで見直す（『覚えた！』済みのカードも再確認）" },
+          { tag: "read", text: "🗺️ Stage 10『金属＋液体の組み合わせ問題』を読む" },
+          { tag: "ankimi", text: "📖→✋ 暗記カード『金属＋液体の反応表』を<strong>覚える</strong>（「覚えた！」まで）" }
+        ]},
+      { title: "STEP 2：濃度・量を変える計算（20分）",
+        tasks: [
+          { tag: "read", text: "🗺️ <strong>まず</strong>Stage 7・8（比例計算3ステップ／うすめる予測）を読む" },
+          { tag: "ankimi", text: "📖→✋ 暗記カード『濃度・量を変えたときのグラフ予測』を<strong>覚える</strong>（「覚えた！」まで）" },
+          { tag: "write", text: "✍️ 定着問題集 基本問題3を解く" }
+        ]},
+      { title: "STEP 3：応用計算（25分）",
+        tasks: [
+          { tag: "write", text: "✍️ 定着問題集 応用例題1・2を解く" },
+          { tag: "write", text: "✍️ 栄冠問題 学び直し1の問題を解く" },
+          { tag: "quiz", text: "⚔️ クイズ『計算』『グラフ』カテゴリを5問以上解く" }
+        ]}
+    ]
+  },
+  {
+    title: "Day 4：応用＋識別実験＋ひっかけ対策",
+    time: "約50分",
+    steps: [
+      { title: "STEP 1：暗記の最終確認（15分）",
+        tasks: [
+          { tag: "ankimi", text: "🔥 暗記カード全8枚を通しで確認（まだ『覚えた！』してないカードがあれば<strong>全部押す</strong>）" },
+          { tag: "write", text: "✍️ 何も見ずに『気体7種の性質表』を書いてみる（書けないところが本当の弱点）" }
+        ]},
+      { title: "STEP 2：識別＆応用（15分）",
+        tasks: [
+          { tag: "read", text: "🗺️ Stage 9『検知管・噴水・重曹の問題』を読む（最後の未読ステージ）" },
+          { tag: "review", text: "🔁 Stage 3（識別）を再読して問題に備える" },
+          { tag: "write", text: "✍️ 栄冠問題 学び直し3 問1を解く（識別問題）" }
+        ]},
+      { title: "STEP 3：応用問題（20分）",
+        tasks: [
+          { tag: "write", text: "✍️ 栄冠問題 学び直し3 問4・5・6を解く" },
+          { tag: "quiz", text: "⚔️ クイズ『応用』カテゴリを解く" },
+          { tag: "review", text: "🔁 間違えた問題を暗記カードと照らし合わせる" }
+        ]}
+    ]
+  },
+  {
+    title: "Day 5：総復習＋ボス討伐",
+    time: "約50分",
+    steps: [
+      { title: "STEP 1：暗記カード総復習（10分）",
+        tasks: [
+          { tag: "ankimi", text: "🔥 暗記カード全8枚を <strong>隠した状態のまま自分で全部言える</strong> か最終チェック" }
+        ]},
+      { title: "STEP 2：ひっかけ＆クイズ通し（15分）",
+        tasks: [
+          { tag: "review", text: "🔁 ⚠️マークの『ひっかけ』を全部見直す" },
+          { tag: "quiz", text: "⚔️ クイズバトル全28問を通しで解いて<strong>80%以上</strong>を目指す" }
+        ]},
+      { title: "STEP 3：ボス討伐（15分）",
+        tasks: [
+          { tag: "boss", text: "👑 ボス戦に挑戦！80%以上で討伐成功" }
+        ]},
+      { title: "STEP 4：問題集の見直し（10分）",
+        tasks: [
+          { tag: "write", text: "✍️ 定着問題集と栄冠問題で<strong>間違えた問題だけ</strong>解き直し" }
+        ]}
+    ]
+  }
+];
+
+// ========= ENEMIES =========
+const ENEMIES = [
+  { emoji: "🧪", name: "アシッドスライム" },
+  { emoji: "💀", name: "ガスゴースト" },
+  { emoji: "🦠", name: "アンモニアン" },
+  { emoji: "🌫️", name: "クロライドミスト" },
+  { emoji: "🔥", name: "サンソファイア" }
+];
+
+// ========= STATE =========
+let stagesClear = JSON.parse(localStorage.getItem(UNIT + "_stages") || "{}");
+let scheduleDone = JSON.parse(localStorage.getItem(UNIT + "_schedule") || "{}");
+let taskDone = JSON.parse(localStorage.getItem(UNIT + "_tasks") || "{}");
+let ankiRead = JSON.parse(localStorage.getItem(UNIT + "_ankiRead") || "{}");
+let achievements = JSON.parse(localStorage.getItem(UNIT + "_ach") || '{"quizPassed":false,"bossPassed":false}');
+let quizState = { idx: 0, correct: 0, order: [], finished: false };
+let bossState = { idx: 0, correct: 0, started: false, finished: false };
+
+// Mastery (ばっちり度) configuration
+const MASTERY = {
+  stages: { weight: 30, total: STAGES.length }, // 10 stages × 3% = 30%
+  anki:   { weight: 10, total: ANKI.length },   // 8 cards  × 1.25% = 10%
+  quiz:   { weight: 30 },                        // 80%+ once = 30%
+  boss:   { weight: 20 },                        // 80%+ once = 20%
+  days:   { weight: 10, total: SCHEDULE.length } // 5 days × 2% = 10%
+};
+
+function calcMastery() {
+  const stagesDone = Object.values(stagesClear).filter(Boolean).length;
+  const ankiDone = Object.values(ankiRead).filter(Boolean).length;
+  const daysDone = Object.values(scheduleDone).filter(Boolean).length;
+  const sP = (stagesDone / MASTERY.stages.total) * MASTERY.stages.weight;
+  const aP = (ankiDone  / MASTERY.anki.total)   * MASTERY.anki.weight;
+  const qP = achievements.quizPassed ? MASTERY.quiz.weight : 0;
+  const bP = achievements.bossPassed ? MASTERY.boss.weight : 0;
+  const dP = (daysDone / MASTERY.days.total) * MASTERY.days.weight;
+  return { stages: sP, anki: aP, quiz: qP, boss: bP, days: dP, total: Math.round(sP + aP + qP + bP + dP), counts: { stagesDone, ankiDone, daysDone } };
+}
+
+function saveAll() {
+  localStorage.setItem(UNIT + "_stages", JSON.stringify(stagesClear));
+  localStorage.setItem(UNIT + "_schedule", JSON.stringify(scheduleDone));
+  localStorage.setItem(UNIT + "_tasks", JSON.stringify(taskDone));
+  localStorage.setItem(UNIT + "_ankiRead", JSON.stringify(ankiRead));
+  localStorage.setItem(UNIT + "_ach", JSON.stringify(achievements));
+}
+
+function updateMastery() {
+  const m = calcMastery();
+  const pct = m.total;
+  const max = pct >= 100;
+  document.getElementById("masteryPct").textContent = pct;
+  document.getElementById("masteryFill").style.width = Math.min(pct, 100) + "%";
+  document.getElementById("masteryDisplay").classList.toggle("max", max);
+  document.getElementById("masteryFill").classList.toggle("max", max);
+  document.getElementById("masteryText").classList.toggle("max", max);
+  document.getElementById("masteryLabel").innerHTML = max
+    ? "🏆 ばっちりマスター達成！"
+    : "ゴールまであと <strong>" + (100 - pct) + "%</strong>";
+  document.getElementById("masteryGoal").textContent = max
+    ? "✨ テスト準備完了！"
+    : "🎯 100%でばっちりマスター";
+  const bd = document.getElementById("masteryBreakdown");
+  bd.innerHTML = [
+    `<span class="mb-item ${m.counts.stagesDone === MASTERY.stages.total ? 'done' : ''}">🗺️ ${m.counts.stagesDone}/${MASTERY.stages.total}</span>`,
+    `<span class="mb-item ${m.counts.ankiDone === MASTERY.anki.total ? 'done' : ''}">📖 ${m.counts.ankiDone}/${MASTERY.anki.total}</span>`,
+    `<span class="mb-item ${achievements.quizPassed ? 'done' : ''}">⚔️ ${achievements.quizPassed ? '✓' : '未'}</span>`,
+    `<span class="mb-item ${achievements.bossPassed ? 'done' : ''}">👑 ${achievements.bossPassed ? '✓' : '未'}</span>`,
+    `<span class="mb-item ${m.counts.daysDone === MASTERY.days.total ? 'done' : ''}">📅 ${m.counts.daysDone}/${MASTERY.days.total}</span>`
+  ].join("");
+}
+
+// ========= TABS =========
+function switchTab(name) {
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b.dataset.tab === name));
+  document.querySelectorAll(".tab-content").forEach(c => c.classList.toggle("active", c.id === "tab-" + name));
+  if (name === "quiz" && !quizState.finished && quizState.order.length === 0) startQuiz();
+}
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+});
+
+// ========= STAGES RENDER =========
+function renderStages() {
+  const list = document.getElementById("stageList");
+  list.innerHTML = "";
+  STAGES.forEach(s => {
+    const card = document.createElement("div");
+    card.className = "stage-card" + (stagesClear[s.id] ? " cleared" : "");
+    const badgeText = s.badge === "anki" ? '<span class="badge b-anki">暗記</span>'
+                    : s.badge === "calc" ? '<span class="badge b-calc">計算</span>'
+                    : '<span class="badge b-read">読取</span>';
+    card.innerHTML = `
+      <div class="stage-icon">${s.id}</div>
+      <div class="stage-title">${badgeText}${s.title}</div>
+      <div class="stage-summary">${s.summary}</div>
+      <div class="stage-detail">
+        <ul>${s.points.map(p => `<li>${p}</li>`).join("")}</ul>
+        <div class="keyword-tags">${s.tags.map(t => `<span class="tag">#${t}</span>`).join("")}</div>
+        <button class="clear-btn ${stagesClear[s.id] ? 'cleared' : ''}" onclick="event.stopPropagation(); clearStage(${s.id}, this)">${stagesClear[s.id] ? '✓ わかった！（+3%）' : '✋ わかった！'}</button>
+      </div>
+    `;
+    card.addEventListener("click", () => card.classList.toggle("open"));
+    list.appendChild(card);
+  });
+}
+function clearStage(id, btn) {
+  if (stagesClear[id]) return;
+  stagesClear[id] = true;
+  saveAll();
+  updateMastery();
+  btn.textContent = "✓ わかった！（+3%）";
+  btn.classList.add("cleared");
+  btn.closest(".stage-card").classList.add("cleared");
+}
+
+// ========= ANKI RENDER =========
+function renderAnki() {
+  const list = document.getElementById("ankiList");
+  list.innerHTML = "";
+  ANKI.forEach((c, i) => {
+    const card = document.createElement("div");
+    card.className = "anki-card" + (ankiRead[i] ? " read" : "");
+    const readBadge = ankiRead[i] ? '<span style="color:#80df80; font-size:0.72em; margin-left:6px; font-weight:900;">✓ 覚えた</span>' : '';
+    const isDone = ankiRead[i];
+    card.innerHTML = `
+      <div class="anki-q">${c.q}${readBadge}</div>
+      <div class="anki-a">
+        ${c.a}
+        <div class="anki-done-wrap">
+          <div class="anki-done-hint">${isDone ? '🎉 このカードはマスター済み！' : '↑ ぜんぶ答えを言えるようになったらタップ →'}</div>
+          <button class="anki-done-btn ${isDone ? 'done' : ''}" data-i="${i}">
+            ${isDone ? '✓ 覚えたよ！（+1.25%）' : '✋ 覚えた！'}
+          </button>
+        </div>
+      </div>`;
+    card.querySelector(".anki-q").addEventListener("click", () => {
+      card.classList.toggle("open");
+    });
+    card.querySelector(".anki-done-btn").addEventListener("click", (e) => {
+      e.stopPropagation();
+      const idx = parseInt(e.currentTarget.dataset.i);
+      if (ankiRead[idx]) return;
+      ankiRead[idx] = true;
+      saveAll();
+      updateMastery();
+      const btn = e.currentTarget;
+      btn.textContent = '✓ 覚えたよ！（+1.25%）';
+      btn.classList.add('done');
+      btn.parentElement.querySelector('.anki-done-hint').innerHTML = '🎉 このカードはマスター済み！';
+      card.classList.add('read');
+      const q = card.querySelector(".anki-q");
+      if (!q.querySelector("span")) {
+        q.insertAdjacentHTML("beforeend", '<span style="color:#80df80; font-size:0.72em; margin-left:6px; font-weight:900;">✓ 覚えた</span>');
+      }
+    });
+    list.appendChild(card);
+  });
+}
+
+// ========= QUIZ =========
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function startQuiz() {
+  quizState = { idx: 0, correct: 0, order: shuffle(QUIZZES.map((_, i) => i)), finished: false };
+  document.getElementById("quizArea").style.display = "";
+  document.getElementById("quizResult").style.display = "none";
+  showQuestion();
+}
+function showQuestion() {
+  const q = QUIZZES[quizState.order[quizState.idx]];
+  const enemy = ENEMIES[quizState.idx % ENEMIES.length];
+  document.getElementById("enemyEmoji").textContent = enemy.emoji;
+  document.getElementById("enemyEmoji").classList.remove("hit");
+  document.getElementById("enemyName").textContent = enemy.name;
+  document.getElementById("enemyHp").style.width = "100%";
+  document.getElementById("qcat").textContent = "[" + (quizState.idx + 1) + "/" + QUIZZES.length + "] " + q.cat;
+  document.getElementById("qtext").innerHTML = q.q;
+  const opts = document.getElementById("qopts");
+  opts.innerHTML = "";
+  q.opts.forEach((o, i) => {
+    const b = document.createElement("button");
+    b.className = "qopt";
+    b.innerHTML = o;
+    b.onclick = () => answerQ(i);
+    opts.appendChild(b);
+  });
+  document.getElementById("qexp").classList.remove("show");
+  document.getElementById("qexp").textContent = "";
+  document.getElementById("nextQ").classList.remove("show");
+}
+function answerQ(i) {
+  const q = QUIZZES[quizState.order[quizState.idx]];
+  const opts = document.querySelectorAll("#qopts .qopt");
+  opts.forEach((b, idx) => {
+    b.disabled = true;
+    if (idx === q.correct) b.classList.add("correct");
+    else if (idx === i) b.classList.add("wrong");
+  });
+  if (i === q.correct) {
+    quizState.correct++;
+    document.getElementById("enemyEmoji").classList.add("hit");
+    document.getElementById("enemyHp").style.width = "0%";
+  }
+  document.getElementById("qexp").innerHTML = "💡 " + q.exp;
+  document.getElementById("qexp").classList.add("show");
+  document.getElementById("nextQ").classList.add("show");
+}
+function nextQuestion() {
+  quizState.idx++;
+  if (quizState.idx >= QUIZZES.length) {
+    finishQuiz();
+  } else {
+    showQuestion();
+  }
+}
+function finishQuiz() {
+  quizState.finished = true;
+  document.getElementById("quizArea").style.display = "none";
+  const res = document.getElementById("quizResult");
+  const pct = Math.round(quizState.correct / QUIZZES.length * 100);
+  const newAchieve = pct >= 80 && !achievements.quizPassed;
+  if (pct >= 80) {
+    achievements.quizPassed = true;
+    saveAll();
+    updateMastery();
+  }
+  const badge = newAchieve
+    ? '<div style="color:#ffe066; font-weight:900; margin-top:10px; font-size:1.1em;">🎉 ばっちり度 +30%！</div>'
+    : (achievements.quizPassed ? '<div style="color:#80f0e0; font-size:0.9em; margin-top:6px;">✓ クリア達成済み</div>' : '<div style="color:#b0d0d0; font-size:0.9em; margin-top:6px;">80%以上でばっちり度+30%！</div>');
+  res.style.display = "";
+  res.innerHTML = `<div class="quiz-result">
+    <h3>⚔️ バトル終了！</h3>
+    <div class="score">${quizState.correct} / ${QUIZZES.length}</div>
+    <div style="color:#80f0e0; font-size:1.2em; margin-top:8px;">正答率 ${pct}%</div>
+    ${badge}
+    <button class="boss-start-btn" style="margin-top:14px; background:linear-gradient(135deg,#4ecdc4,#2a8a8a);" onclick="startQuiz()">もう一度</button>
+  </div>`;
+}
+
+// ========= BOSS =========
+function startBoss() {
+  bossState = { idx: 0, correct: 0, started: true, finished: false };
+  showBossQ();
+}
+function showBossQ() {
+  const q = BOSS[bossState.idx];
+  const area = document.getElementById("bossArea");
+  area.innerHTML = `
+    <div class="enemy-area">
+      <div class="enemy-emoji">⚗️👹</div>
+      <div class="enemy-name">気体マスター・ガスゴーレム</div>
+      <div class="enemy-hp-bar"><div class="enemy-hp-fill" style="width:${100 - bossState.idx * 10}%"></div></div>
+    </div>
+    <div class="qcard">
+      <span class="qcat">[${bossState.idx + 1}/${BOSS.length}] ボス問題</span>
+      <div class="qtext">${q.q}</div>
+      <div id="bopts"></div>
+      <div class="explanation" id="bexp"></div>
+      <button class="next-q-btn" id="bnext">次の問題 →</button>
+    </div>`;
+  const opts = document.getElementById("bopts");
+  q.opts.forEach((o, i) => {
+    const b = document.createElement("button");
+    b.className = "qopt";
+    b.innerHTML = o;
+    b.onclick = () => answerBoss(i);
+    opts.appendChild(b);
+  });
+}
+function answerBoss(i) {
+  const q = BOSS[bossState.idx];
+  const opts = document.querySelectorAll("#bopts .qopt");
+  opts.forEach((b, idx) => {
+    b.disabled = true;
+    if (idx === q.correct) b.classList.add("correct");
+    else if (idx === i) b.classList.add("wrong");
+  });
+  if (i === q.correct) bossState.correct++;
+  const exp = document.getElementById("bexp");
+  exp.innerHTML = "💡 " + q.exp;
+  exp.classList.add("show");
+  const next = document.getElementById("bnext");
+  next.classList.add("show");
+  next.onclick = () => {
+    bossState.idx++;
+    if (bossState.idx >= BOSS.length) finishBoss();
+    else showBossQ();
+  };
+}
+function finishBoss() {
+  bossState.finished = true;
+  const pct = Math.round(bossState.correct / BOSS.length * 100);
+  const win = pct >= 80;
+  const newAchieve = win && !achievements.bossPassed;
+  if (win) {
+    achievements.bossPassed = true;
+    saveAll();
+    updateMastery();
+  }
+  const badge = newAchieve
+    ? '<div style="color:#ffe066; font-weight:900; margin-top:6px;">🎉 ばっちり度 +20%！</div>'
+    : (achievements.bossPassed ? '<div style="color:#80f0e0; font-size:0.9em; margin-top:4px;">✓ 討伐達成済み</div>' : '');
+  const area = document.getElementById("bossArea");
+  area.innerHTML = `<div class="boss-intro ${win ? 'boss-result-victory' : ''}">
+    <div class="boss-emoji">${win ? '🏆' : '💔'}</div>
+    <div class="boss-name">${win ? '討伐成功！' : 'もう一歩！'}</div>
+    <div class="boss-desc">
+      正解 ${bossState.correct} / ${BOSS.length}（${pct}%）<br>
+      ${win ? 'ガスゴーレム討伐成功！' : '80%以上で討伐成功。もう一度挑戦！'}
+      ${badge}
+    </div>
+    <button class="boss-start-btn" onclick="startBoss()">${win ? 'もう一度挑戦' : '再挑戦'}</button>
+  </div>`;
+}
+
+// ========= SCHEDULE =========
+function renderSchedule() {
+  const list = document.getElementById("scheduleList");
+  list.innerHTML = "";
+  SCHEDULE.forEach((day, dIdx) => {
+    const card = document.createElement("div");
+    const dayId = "day" + dIdx;
+    card.className = "day-card" + (scheduleDone[dayId] ? " cleared" : "");
+    let stepsHtml = day.steps.map((step, sIdx) => {
+      const tasksHtml = step.tasks.map((t, tIdx) => {
+        const tid = dayId + "_" + sIdx + "_" + tIdx;
+        const checked = taskDone[tid] ? "checked" : "";
+        const tagClass = "tag-" + t.tag;
+        const tagLabel = t.tag === "read" ? "読む" :
+                         t.tag === "write" ? "書く" :
+                         t.tag === "quiz" ? "解く" :
+                         t.tag === "review" ? "復習" :
+                         t.tag === "boss" ? "ボス" :
+                         t.tag === "ankimi" ? "暗記" : t.tag;
+        return `<label class="task-row">
+          <input type="checkbox" data-tid="${tid}" ${checked}>
+          <span><span class="ttag ${tagClass}">${tagLabel}</span>${t.text}</span>
+        </label>`;
+      }).join("");
+      return `<div class="step-block"><div class="step-title">${step.title}</div>${tasksHtml}</div>`;
+    }).join("");
+    card.innerHTML = `
+      <div class="day-header">
+        <div><div class="day-title">${day.title}</div><div class="day-time">${day.time}</div></div>
+      </div>
+      <div class="day-detail">
+        ${stepsHtml}
+        <button class="day-clear-btn ${scheduleDone[dayId] ? 'cleared' : ''}" onclick="event.stopPropagation(); clearDay('${dayId}', this)">${scheduleDone[dayId] ? '✓ この日クリア！（+2%）' : 'この日をクリア！ +2%'}</button>
+      </div>
+    `;
+    card.querySelector(".day-header").addEventListener("click", () => card.classList.toggle("open"));
+    list.appendChild(card);
+  });
+  document.querySelectorAll(".task-row input").forEach(cb => {
+    cb.addEventListener("change", e => {
+      taskDone[cb.dataset.tid] = cb.checked;
+      saveAll();
+    });
+  });
+  updateDayProgress();
+}
+function clearDay(id, btn) {
+  if (scheduleDone[id]) return;
+  scheduleDone[id] = true;
+  saveAll();
+  updateMastery();
+  btn.textContent = "✓ Day クリア済み";
+  btn.classList.add("cleared");
+  btn.closest(".day-card").classList.add("cleared");
+  updateDayProgress();
+}
+function updateDayProgress() {
+  const done = Object.values(scheduleDone).filter(Boolean).length;
+  document.getElementById("dayDone").textContent = done;
+  document.getElementById("dayProgress").style.width = (done / SCHEDULE.length * 100) + "%";
+}
+
+// ========= BUBBLES =========
+function makeBubbles() {
+  const wrap = document.getElementById("bubbles");
+  for (let i = 0; i < 15; i++) {
+    const b = document.createElement("div");
+    b.className = "bubble";
+    const size = Math.random() * 18 + 6;
+    b.style.width = size + "px";
+    b.style.height = size + "px";
+    b.style.left = Math.random() * 100 + "vw";
+    b.style.bottom = "-20vh";
+    b.style.setProperty("--dur", (Math.random() * 12 + 8) + "s");
+    b.style.setProperty("--drift", (Math.random() * 60 - 30) + "px");
+    b.style.animationDelay = -Math.random() * 20 + "s";
+    wrap.appendChild(b);
+  }
+}
+
+// ========= HIDE-TO-REVEAL =========
+document.addEventListener("click", (e) => {
+  const t = e.target.closest(".hide");
+  if (t) {
+    t.classList.toggle("show");
+    e.stopPropagation();
+  }
+});
+
+// ========= INIT =========
+renderStages();
+renderAnki();
+renderSchedule();
+updateMastery();
+makeBubbles();
+</script>
+</body>
+</html>
