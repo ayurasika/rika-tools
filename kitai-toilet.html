@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>気体と化学反応 覚えにくい15 - トイレ壁用</title>
+<style>
+  @page { size: A4; margin: 10mm; }
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    font-family: 'Noto Sans JP', sans-serif;
+    color: #1a3a3a;
+    background: linear-gradient(180deg, #d8eee8 0%, #f5fbfa 100%);
+  }
+  .page {
+    width: 190mm;
+    margin: 0 auto;
+    padding: 5mm;
+  }
+
+  /* ===== HEADER ===== */
+  .head {
+    text-align: center;
+    padding: 1mm 0 2mm;
+    border-bottom: 2.5px solid #4ecdc4;
+    margin-bottom: 3mm;
+    position: relative;
+  }
+  .head .title {
+    font-size: 18pt; font-weight: 900;
+    background: linear-gradient(90deg, #2a8a8a, #4ecdc4, #ff8c50, #cc5500, #b03060);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .head .sub {
+    font-size: 8.5pt; color: #4a6a6a; margin-top: 0.5mm; font-weight: 700;
+  }
+
+  /* ===== GRID ===== */
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2.5mm;
+  }
+  .item {
+    background: #fff;
+    border: 1.5px solid #cce8e0;
+    border-radius: 3mm;
+    padding: 2mm 2.5mm 2mm;
+    page-break-inside: avoid;
+    position: relative;
+  }
+  .item.hard { border-color: #ffcc66; background: #fffef0; }
+  .item.trick { border-color: #ff8888; background: #fff4f4; }
+
+  .item-num {
+    position: absolute;
+    top: -2.5mm; left: 1.5mm;
+    width: 6mm; height: 6mm;
+    background: linear-gradient(135deg, #4ecdc4, #2a8a8a);
+    color: #fff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 8pt; font-weight: 900;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  }
+  .item.hard .item-num { background: linear-gradient(135deg, #ff9933, #e66600); }
+  .item.trick .item-num { background: linear-gradient(135deg, #ff5e5e, #cc2222); }
+
+  .item-tag {
+    position: absolute;
+    top: 1.2mm; right: 1.5mm;
+    font-size: 6pt; font-weight: 900;
+    padding: 0.3mm 1.5mm;
+    border-radius: 1.5mm;
+    color: #fff;
+  }
+  .tag-num { background: #3c8cdb; }
+  .tag-dir { background: #4abf4a; }
+  .tag-trick { background: #cc3333; }
+
+  .q {
+    font-size: 9.5pt; font-weight: 900;
+    margin-top: 2.5mm; margin-bottom: 1mm;
+    line-height: 1.25;
+    color: #1a3a3a;
+  }
+  .a {
+    font-size: 11pt; font-weight: 900;
+    color: #cc3300;
+    line-height: 1.25;
+  }
+  .a .light {
+    font-size: 7.5pt; font-weight: 700; color: #888;
+  }
+
+  /* ===== MAP BOX ===== */
+  .map-box {
+    grid-column: span 3;
+    background: linear-gradient(135deg, #f0fbf8, #f5fbfa);
+    border: 2px solid #4ecdc4;
+    border-radius: 3mm;
+    padding: 2.5mm 3mm;
+    margin-top: 1.5mm;
+  }
+  .map-box .box-title {
+    font-size: 10pt; font-weight: 900;
+    color: #2a8a8a;
+    margin-bottom: 1.5mm;
+    text-align: center;
+  }
+  .map-grid {
+    display: grid;
+    grid-template-columns: auto 1fr 1fr;
+    gap: 1mm 2.5mm;
+    align-items: stretch;
+  }
+  .map-grid .label {
+    font-size: 9pt;
+    font-weight: 900;
+    text-align: center;
+    padding: 0.8mm 2mm;
+    background: #fff;
+    border-radius: 1.5mm;
+    border: 1.2px solid #ddd;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .map-grid .head-label {
+    background: #4ecdc4; color: #fff; border-color: #4ecdc4;
+  }
+  .map-cell {
+    font-size: 9pt;
+    text-align: center;
+    padding: 1.2mm;
+    background: #fff;
+    border-radius: 1.5mm;
+    border: 1.2px solid #ddd;
+    font-weight: 700;
+  }
+  .map-cell strong { color: #cc3300; font-size: 10.5pt; }
+  .map-cell .sub { display: block; font-size: 7.5pt; color: #888; margin-top: 0.3mm; }
+
+  /* ===== REACTION BOX ===== */
+  .reaction-box {
+    grid-column: span 3;
+    background: linear-gradient(135deg, #fff5ee, #fffaf5);
+    border: 2px solid #ff8c50;
+    border-radius: 3mm;
+    padding: 2mm 3mm;
+  }
+  .reaction-box .box-title {
+    font-size: 10pt; font-weight: 900;
+    color: #cc5500;
+    margin-bottom: 1.5mm;
+    text-align: center;
+  }
+  .reaction-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 2mm;
+  }
+  .reaction-card {
+    text-align: center;
+    background: #fff;
+    border-radius: 1.5mm;
+    padding: 1.2mm;
+    border: 1.2px solid #ffd9c2;
+  }
+  .reaction-card .emoji { font-size: 14pt; line-height: 1; }
+  .reaction-card .gas-name { font-size: 8.5pt; font-weight: 900; margin: 0.5mm 0; color: #cc5500; }
+  .reaction-card .gas-detail { font-size: 7.5pt; font-weight: 700; color: #1a3a3a; line-height: 1.3; }
+
+  /* ===== FOOTER ===== */
+  .footer {
+    margin-top: 2.5mm;
+    text-align: center;
+    font-size: 7.5pt;
+    color: #4a8a8a;
+    padding-top: 1.5mm;
+    border-top: 1px dashed #ccc;
+  }
+  .footer strong { color: #cc3300; }
+
+  @media screen {
+    body { padding: 10px; }
+    .page {
+      background: #fff;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      padding: 12mm;
+      margin: 10px auto;
+    }
+  }
+  @media print {
+    html, body { background: #fff; }
+    .page { box-shadow: none; padding: 5mm; margin: 0; }
+    .no-print { display: none; }
+  }
+
+  .print-btn {
+    position: fixed; top: 10px; right: 10px;
+    padding: 8px 16px;
+    background: #4ecdc4; color: #fff;
+    border: none; border-radius: 6px;
+    font-size: 11pt; font-weight: 700;
+    cursor: pointer; font-family: inherit;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  }
+</style>
+</head>
+<body>
+
+<button class="print-btn no-print" onclick="window.print()">🖨 印刷する</button>
+
+<div class="page">
+
+  <div class="head">
+    <div class="title">⚗️ 気体と化学反応 覚えにくい15</div>
+    <div class="sub">チラ見3秒でOK ／ 毎日見るだけで頭に残る</div>
+  </div>
+
+  <div class="grid">
+
+    <!-- 1: 銅は反応しない -->
+    <div class="item trick">
+      <div class="item-num">1</div>
+      <div class="item-tag tag-trick">ひっかけ</div>
+      <div class="q">銅は塩酸＆水酸化Na…</div>
+      <div class="a">どっちも<strong style="color:#cc0000">反応しない</strong> <span class="light">（金属の例外）</span></div>
+    </div>
+
+    <!-- 2: ふたまた -->
+    <div class="item">
+      <div class="item-num">2</div>
+      <div class="item-tag tag-dir">向き</div>
+      <div class="q">ふたまた試験管 固体は？</div>
+      <div class="a">くびれ側 <span class="light">（止めるとき液体戻す）</span></div>
+    </div>
+
+    <!-- 3: 水素 0.07倍 -->
+    <div class="item hard">
+      <div class="item-num">3</div>
+      <div class="item-tag tag-num">数字</div>
+      <div class="q">水素は空気の何倍？</div>
+      <div class="a">0.07倍 <span class="light">（最も軽い）</span></div>
+    </div>
+
+    <!-- 4: 二酸化炭素どこでもOK -->
+    <div class="item trick">
+      <div class="item-num">4</div>
+      <div class="item-tag tag-trick">ひっかけ</div>
+      <div class="q">二酸化炭素の集め方</div>
+      <div class="a">水上でも下方でもOK <span class="light">（とけ方は弱い）</span></div>
+    </div>
+
+    <!-- 5: 三角フラスコのガラス管 -->
+    <div class="item">
+      <div class="item-num">5</div>
+      <div class="item-tag tag-dir">向き</div>
+      <div class="q">三角フラスコ ろうと側</div>
+      <div class="a">ガラス管は<strong>長く</strong> <span class="light">（逆流防止）</span></div>
+    </div>
+
+    <!-- 6: 二酸化炭素 1.5倍 -->
+    <div class="item hard">
+      <div class="item-num">6</div>
+      <div class="item-tag tag-num">数字</div>
+      <div class="q">二酸化炭素は空気の何倍？</div>
+      <div class="a">1.5倍 <span class="light">（重い）</span></div>
+    </div>
+
+    <!-- 7: 上方=アンモニアだけ -->
+    <div class="item">
+      <div class="item-num">7</div>
+      <div class="item-tag tag-dir">向き</div>
+      <div class="q">上方置換で集めるのは？</div>
+      <div class="a">アンモニアだけ <span class="light">（軽い＋とける）</span></div>
+    </div>
+
+    <!-- 8: 鉄+水酸化Na -->
+    <div class="item trick">
+      <div class="item-num">8</div>
+      <div class="item-tag tag-trick">ひっかけ</div>
+      <div class="q">鉄＋水酸化Na水溶液</div>
+      <div class="a">反応<strong style="color:#cc0000">しない</strong> <span class="light">（アルミは反応する）</span></div>
+    </div>
+
+    <!-- 9: ポン=水素 -->
+    <div class="item">
+      <div class="item-num">9</div>
+      <div class="item-tag tag-dir">向き</div>
+      <div class="q">「ポン」と音は何？</div>
+      <div class="a">水素 <span class="light">（青白い炎）</span></div>
+    </div>
+
+    <!-- 10: 貝がら=二酸化炭素 -->
+    <div class="item trick">
+      <div class="item-num">10</div>
+      <div class="item-tag tag-trick">ひっかけ</div>
+      <div class="q">貝がら＋塩酸の発生気体</div>
+      <div class="a">二酸化炭素 <span class="light">（水素じゃない！）</span></div>
+    </div>
+
+    <!-- 11: 線香=酸素 -->
+    <div class="item">
+      <div class="item-num">11</div>
+      <div class="item-tag tag-dir">向き</div>
+      <div class="q">線香が激しく燃える気体</div>
+      <div class="a">酸素 <span class="light">（助燃性）</span></div>
+    </div>
+
+    <!-- 12: 触媒=しょくばい -->
+    <div class="item hard">
+      <div class="item-num">12</div>
+      <div class="item-tag tag-num">数字</div>
+      <div class="q">二酸化マンガンの働き<br>（ひらがな5字）</div>
+      <div class="a">しょくばい <span class="light">（触媒）</span></div>
+    </div>
+
+    <!-- 13: 石灰水 -->
+    <div class="item">
+      <div class="item-num">13</div>
+      <div class="item-tag tag-dir">向き</div>
+      <div class="q">石灰水を白くにごらせる</div>
+      <div class="a">二酸化炭素 <span class="light">（CO₂の確認専用）</span></div>
+    </div>
+
+    <!-- 14: うすめても最大量同じ -->
+    <div class="item trick">
+      <div class="item-num">14</div>
+      <div class="item-tag tag-trick">ひっかけ</div>
+      <div class="q">液体を2倍にうすめると</div>
+      <div class="a">最大量は<strong style="color:#cc0000">同じ</strong> <span class="light">（量増やす≠濃度を変える）</span></div>
+    </div>
+
+    <!-- 15: 折れ点 -->
+    <div class="item hard">
+      <div class="item-num">15</div>
+      <div class="item-tag tag-num">数字</div>
+      <div class="q">グラフの折れ点 = ？</div>
+      <div class="a">過不足なく反応した点 <span class="light">（左:加えた方全部反応／右:加えた方残る）</span></div>
+    </div>
+
+    <!-- 気体性質マップ -->
+    <div class="map-box">
+      <div class="box-title">🗺 気体7種マップ（におい × 空気との重さ）</div>
+      <div class="map-grid">
+        <div class="label head-label"></div>
+        <div class="label head-label">空気より<strong>軽い</strong>（&lt;1）</div>
+        <div class="label head-label">空気より<strong>重い</strong>（&gt;1）</div>
+
+        <div class="label">におい<br><strong>なし</strong></div>
+        <div class="map-cell"><strong>水素</strong> 0.07<span class="sub">水上置換</span></div>
+        <div class="map-cell"><strong>酸素</strong>1.1／<strong>二酸化炭素</strong>1.5／<strong>ちっ素</strong>0.97<span class="sub">水上(CO₂は下方も可)</span></div>
+
+        <div class="label">におい<br><strong>あり</strong></div>
+        <div class="map-cell"><strong>アンモニア</strong> 0.6<span class="sub">上方置換 / アルカリ</span></div>
+        <div class="map-cell"><strong>塩化水素</strong>1.3／<strong>二酸化硫黄</strong>1.2<span class="sub">下方置換 / 酸性</span></div>
+      </div>
+    </div>
+
+    <!-- 反応の組み合わせ -->
+    <div class="reaction-box">
+      <div class="box-title">🧪 主要反応の組み合わせ（固体＋液体 → 気体）</div>
+      <div class="reaction-row">
+        <div class="reaction-card">
+          <div class="emoji">🌬</div>
+          <div class="gas-name">酸素</div>
+          <div class="gas-detail">二酸化マンガン<br>＋過酸化水素水</div>
+        </div>
+        <div class="reaction-card">
+          <div class="emoji">💨</div>
+          <div class="gas-name">二酸化炭素</div>
+          <div class="gas-detail">石灰石<br>＋塩酸</div>
+        </div>
+        <div class="reaction-card">
+          <div class="emoji">⚡</div>
+          <div class="gas-name">水素</div>
+          <div class="gas-detail">アルミ/鉄/亜鉛<br>＋塩酸</div>
+        </div>
+        <div class="reaction-card">
+          <div class="emoji">🌸</div>
+          <div class="gas-name">アンモニア</div>
+          <div class="gas-detail">塩化アンモニウム<br>＋水酸化カルシウム</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    🚽 <strong>毎日1回チラ見するだけで十分！</strong> ／ A4 1枚で印刷OK
+  </div>
+</div>
+
+</body>
+</html>

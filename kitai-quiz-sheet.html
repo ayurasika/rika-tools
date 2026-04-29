@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>気体と化学反応 第28回 クイズシート（A4印刷用）</title>
+<style>
+  @page { size: A4; margin: 8mm 10mm; }
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif;
+    font-size: 8.5pt;
+    color: #000;
+    background: #fff;
+    line-height: 1.35;
+  }
+  .page {
+    width: 190mm;
+    margin: 0 auto;
+    padding: 3mm 0;
+  }
+  .header {
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 2px solid #000;
+    padding-bottom: 2mm;
+    margin-bottom: 2mm;
+  }
+  .title {
+    font-size: 14pt; font-weight: 900;
+  }
+  .subtitle {
+    font-size: 8pt; color: #444;
+  }
+  .legend {
+    font-size: 7.5pt;
+    display: flex; gap: 6px;
+  }
+  .legend span { padding: 1px 6px; border-radius: 3px; color: #fff; font-weight: 700; }
+
+  .columns {
+    column-count: 2;
+    column-gap: 5mm;
+    column-rule: 1px dashed #bbb;
+  }
+  .cat {
+    break-inside: avoid;
+    margin-bottom: 1.5mm;
+    page-break-inside: avoid;
+  }
+  .cat-title {
+    font-size: 8.8pt; font-weight: 900; color: #fff;
+    padding: 1px 5px;
+    margin-bottom: 0.6mm;
+    border-radius: 3px;
+    display: inline-block;
+  }
+  .c-anki { background: #d44; }
+  .c-keisan { background: #3080d0; }
+  .c-yomi { background: #3a9a3a; }
+  .c-base { background: #666; }
+  .c-trap { background: #b03000; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+  tr { break-inside: avoid; page-break-inside: avoid; }
+  td {
+    border-bottom: 0.5px solid #ddd;
+    padding: 0.8px 2px;
+    vertical-align: top;
+    font-size: 7.8pt;
+    line-height: 1.25;
+  }
+  td.num {
+    width: 4mm; color: #888; font-size: 7pt;
+    text-align: right; padding-right: 2px;
+  }
+  td.q { width: 52%; }
+  td.a {
+    color: #b03000;
+    font-weight: 700;
+  }
+  td.a strong { background: #ffe; padding: 0 2px; }
+
+  .footer {
+    margin-top: 2mm;
+    padding-top: 1.5mm;
+    border-top: 1px solid #888;
+    font-size: 7pt; color: #555;
+    display: flex; justify-content: space-between;
+  }
+
+  @media screen {
+    body { background: #e8e8e8; padding: 10px; }
+    .page {
+      background: #fff;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+      padding: 10mm;
+      margin: 10px auto;
+      min-height: 277mm;
+    }
+  }
+  @media print {
+    body { background: #fff; }
+    .page { box-shadow: none; padding: 0; margin: 0; min-height: 0; }
+    .no-print { display: none; }
+  }
+
+  .print-btn {
+    position: fixed; top: 10px; right: 10px;
+    padding: 8px 16px;
+    background: #3080d0; color: #fff;
+    border: none; border-radius: 6px;
+    font-size: 11pt; font-weight: 700;
+    cursor: pointer; font-family: inherit;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  }
+</style>
+</head>
+<body>
+
+<button class="print-btn no-print" onclick="window.print()">🖨 印刷する</button>
+
+<div class="page">
+
+  <div class="header">
+    <div>
+      <div class="title">⚗️ 第28回 気体と化学反応 クイズシート</div>
+      <div class="subtitle">お母さんが読む → 子が答える。答えは右に書いてあるのでパッと確認OK</div>
+    </div>
+    <div class="legend">
+      <span class="c-anki">暗記</span>
+      <span class="c-keisan">計算</span>
+      <span class="c-yomi">読取</span>
+      <span class="c-trap">引っ掛け</span>
+    </div>
+  </div>
+
+  <div class="columns">
+
+    <!-- 1. 気体7種の性質 -->
+    <div class="cat">
+      <div class="cat-title c-anki">⚗️ 気体7種の性質</div>
+      <table>
+        <tr><td class="num">1</td><td class="q">酸素の重さは空気の何倍？</td><td class="a">約<strong>1.1倍</strong>（重い）</td></tr>
+        <tr><td class="num">2</td><td class="q">二酸化炭素は空気の何倍？</td><td class="a">約<strong>1.5倍</strong>（重い）</td></tr>
+        <tr><td class="num">3</td><td class="q">水素は空気の何倍？</td><td class="a">約<strong>0.07倍</strong>（軽い）</td></tr>
+        <tr><td class="num">4</td><td class="q">ちっ素は空気の何倍？</td><td class="a">約<strong>0.97倍</strong>（ほぼ同じ）</td></tr>
+        <tr><td class="num">5</td><td class="q">アンモニアは空気の何倍？</td><td class="a">約<strong>0.6倍</strong>（軽い）</td></tr>
+        <tr><td class="num">6</td><td class="q">塩化水素は空気の何倍？</td><td class="a">約<strong>1.3倍</strong>（重い）</td></tr>
+        <tr><td class="num">7</td><td class="q">刺激臭がある気体3つは？</td><td class="a">アンモニア・塩化水素・二酸化硫黄</td></tr>
+        <tr><td class="num">8</td><td class="q">空気より軽い気体は？（2つ）</td><td class="a"><strong>水素・アンモニア</strong></td></tr>
+      </table>
+    </div>
+
+    <!-- 2. 作り方の組み合わせ -->
+    <div class="cat">
+      <div class="cat-title c-anki">🧪 作り方の組み合わせ</div>
+      <table>
+        <tr><td class="num">9</td><td class="q">酸素を作るには何＋何？</td><td class="a">二酸化マンガン＋<strong>過酸化水素水</strong></td></tr>
+        <tr><td class="num">10</td><td class="q">二酸化炭素を作るには何＋何？</td><td class="a"><strong>石灰石</strong>＋塩酸</td></tr>
+        <tr><td class="num">11</td><td class="q">水素を作るには何＋何？</td><td class="a">アルミ・鉄・亜鉛＋<strong>塩酸</strong></td></tr>
+        <tr><td class="num">12</td><td class="q">アンモニアを作るには何＋何？</td><td class="a">塩化アンモニウム＋<strong>水酸化カルシウム</strong>（加熱）</td></tr>
+        <tr><td class="num">13</td><td class="q">二酸化マンガンの働き（ひらがな5字）は？</td><td class="a"><strong>しょくばい</strong>（触媒）</td></tr>
+        <tr><td class="num">14</td><td class="q">「触媒」って何をするもの？</td><td class="a">自分は変化せず反応を助ける働き</td></tr>
+      </table>
+    </div>
+
+    <!-- 3. 集め方 -->
+    <div class="cat">
+      <div class="cat-title c-anki">🌡 集め方3種類</div>
+      <table>
+        <tr><td class="num">15</td><td class="q">水にとけにくい気体は？</td><td class="a"><strong>水上置換</strong></td></tr>
+        <tr><td class="num">16</td><td class="q">水にとけて空気より重い気体は？</td><td class="a"><strong>下方置換</strong></td></tr>
+        <tr><td class="num">17</td><td class="q">水にとけて空気より軽い気体は？</td><td class="a"><strong>上方置換</strong></td></tr>
+        <tr><td class="num">18</td><td class="q">上方置換で集める気体は？</td><td class="a"><strong>アンモニアだけ</strong></td></tr>
+        <tr><td class="num">19</td><td class="q">水上置換のメリットは？（3つ）</td><td class="a">純粋に集まる／量がわかる／空気と混ざらない</td></tr>
+      </table>
+    </div>
+
+    <!-- 4. 装置 -->
+    <div class="cat">
+      <div class="cat-title c-yomi">🔬 装置のしくみ</div>
+      <table>
+        <tr><td class="num">20</td><td class="q">三角フラスコのろうと側ガラス管の長さは？</td><td class="a"><strong>長い</strong></td></tr>
+        <tr><td class="num">21</td><td class="q">なぜ長くするの？</td><td class="a">気体がろうとに<strong>逆流するのを防ぐ</strong>ため</td></tr>
+        <tr><td class="num">22</td><td class="q">もう一方のガラス管の長さは？理由は？</td><td class="a"><strong>短い</strong>（液面より上、液体が出ていかないため）</td></tr>
+        <tr><td class="num">23</td><td class="q">ふたまた試験管で固体を入れるのはどっち側？</td><td class="a"><strong>くびれのある側</strong></td></tr>
+        <tr><td class="num">24</td><td class="q">ふたまたで反応を止めるには？</td><td class="a"><strong>くびれ側に液体を戻す</strong></td></tr>
+        <tr><td class="num">25</td><td class="q">三角フラスコは途中で反応を止められる？</td><td class="a"><strong>止められない</strong></td></tr>
+      </table>
+    </div>
+
+    <!-- 5. 識別実験 -->
+    <div class="cat">
+      <div class="cat-title c-yomi">🧪 識別実験</div>
+      <table>
+        <tr><td class="num">26</td><td class="q">火を近づけて「ポン」と音がする気体は？</td><td class="a"><strong>水素</strong>（青白い炎）</td></tr>
+        <tr><td class="num">27</td><td class="q">線香が激しく燃える気体は？</td><td class="a"><strong>酸素</strong>（助燃性）</td></tr>
+        <tr><td class="num">28</td><td class="q">石灰水を白くにごらせる気体は？</td><td class="a"><strong>二酸化炭素</strong></td></tr>
+        <tr><td class="num">29</td><td class="q">赤リトマス紙を青に変える気体は？</td><td class="a"><strong>アンモニア</strong>（アルカリ性）</td></tr>
+        <tr><td class="num">30</td><td class="q">青リトマス紙を赤に変える気体は？</td><td class="a">塩化水素・二酸化硫黄（酸性）</td></tr>
+        <tr><td class="num">31</td><td class="q">燃えない・無臭・無色・無反応の気体は？</td><td class="a"><strong>ちっ素</strong></td></tr>
+      </table>
+    </div>
+
+    <!-- 6. グラフ折れ点 -->
+    <div class="cat">
+      <div class="cat-title c-keisan">📊 グラフの折れ点</div>
+      <table>
+        <tr><td class="num">32</td><td class="q">グラフの折れ点とは？</td><td class="a"><strong>ちょうど過不足なく反応した点</strong></td></tr>
+        <tr><td class="num">33</td><td class="q">折れ点までの線は何？</td><td class="a"><strong>正比例</strong>（直線）</td></tr>
+        <tr><td class="num">34</td><td class="q">折れ点より上の線は？</td><td class="a"><strong>水平</strong>（増えても変わらない）</td></tr>
+        <tr><td class="num">35</td><td class="q">折れ点より左側に来るとどうなる？</td><td class="a">加えた方が全部反応、もう片方が<strong>残る</strong></td></tr>
+        <tr><td class="num">36</td><td class="q">折れ点より右側に来るとどうなる？</td><td class="a">加えた方が残る、もう片方が<strong>全部反応</strong></td></tr>
+      </table>
+    </div>
+
+    <!-- 7. 比例計算 -->
+    <div class="cat">
+      <div class="cat-title c-keisan">🧮 比例計算（鉄板3ステップ）</div>
+      <table>
+        <tr><td class="num">37</td><td class="q">計算の3ステップは？</td><td class="a"><strong>①折れ点確認 → ②過不足判定 → ③足りない方で計算</strong></td></tr>
+        <tr><td class="num">38</td><td class="q">塩酸20cm³＋金属0.4gで気体100cm³（折れ点）。金属0.6gは？</td><td class="a"><strong>150cm³</strong>（金属は塩酸で全反応せず塩酸が制限） ※塩酸十分なら150cm³</td></tr>
+        <tr><td class="num">39</td><td class="q">塩酸40cm³＋金属0.4gは？（折れ点20cm³／100cm³）</td><td class="a"><strong>100cm³</strong>（金属が制限）</td></tr>
+        <tr><td class="num">40</td><td class="q">気体最大量は何で決まる？</td><td class="a"><strong>固体の量</strong>で決まる</td></tr>
+      </table>
+    </div>
+
+    <!-- 8. うすめる・2倍 -->
+    <div class="cat">
+      <div class="cat-title c-keisan">🔄 うすめる・2倍にする</div>
+      <table>
+        <tr><td class="num">41</td><td class="q">液体を2倍にうすめる、最大量は？</td><td class="a"><strong>同じ</strong>（折れ点だけ右に2倍）</td></tr>
+        <tr><td class="num">42</td><td class="q">液体を2倍量にする、最大量は？</td><td class="a"><strong>2倍</strong></td></tr>
+        <tr><td class="num">43</td><td class="q">固体を2倍にする、折れ点は？</td><td class="a">上に2倍／最大量も2倍</td></tr>
+        <tr><td class="num">44</td><td class="q">濃度を2倍濃くする、必要量は？</td><td class="a">折れ点 <strong>左に半分</strong>／最大量同じ</td></tr>
+        <tr><td class="num">45</td><td class="q">「うすめる」と「量を増やす」の決定的な違いは？</td><td class="a">うすめる→最大量は変わらず／量増→最大量も増える</td></tr>
+      </table>
+    </div>
+
+    <!-- 9. アンモニア噴水 -->
+    <div class="cat">
+      <div class="cat-title c-yomi">💧 アンモニア噴水</div>
+      <table>
+        <tr><td class="num">46</td><td class="q">水が吸い上がる理由は？</td><td class="a">アンモニアが<strong>水によくとけて気圧が下がる</strong>から</td></tr>
+        <tr><td class="num">47</td><td class="q">これは何の性質？</td><td class="a">アンモニアの<strong>水に非常によくとける性質</strong></td></tr>
+        <tr><td class="num">48</td><td class="q">水はどう吹き出す？</td><td class="a"><strong>噴水のように</strong>勢いよく</td></tr>
+      </table>
+    </div>
+
+    <!-- 10. 検知管 -->
+    <div class="cat">
+      <div class="cat-title c-yomi">🔍 気体検知管</div>
+      <table>
+        <tr><td class="num">49</td><td class="q">使う前の最初の手順は？</td><td class="a"><strong>両端を折る</strong></td></tr>
+        <tr><td class="num">50</td><td class="q">使い方の順は？</td><td class="a">①両端折る→②カバーゴム→③差し込む→④ハンドル→⑤時間待つ→⑥数値読む</td></tr>
+        <tr><td class="num">51</td><td class="q">酸素用検知管の注意点は？</td><td class="a">使用後<strong>熱い</strong>のでさわらない</td></tr>
+      </table>
+    </div>
+
+    <!-- 11. 金属反応 -->
+    <div class="cat">
+      <div class="cat-title c-anki">⚙️ 金属＋液体の反応</div>
+      <table>
+        <tr><td class="num">52</td><td class="q">塩酸と反応<strong>しない</strong>金属は？</td><td class="a"><strong>銅</strong>だけ反応しない</td></tr>
+        <tr><td class="num">53</td><td class="q">水酸化Na水溶液と反応する金属は？</td><td class="a"><strong>アルミ</strong>と亜鉛（加熱）のみ</td></tr>
+        <tr><td class="num">54</td><td class="q">水酸化Na水溶液と反応<strong>しない</strong>金属は？</td><td class="a"><strong>鉄・銅・マグネシウム</strong></td></tr>
+        <tr><td class="num">55</td><td class="q">貝がら（炭酸カルシウム）＋塩酸 →？</td><td class="a"><strong>二酸化炭素</strong>（水素じゃない！）</td></tr>
+        <tr><td class="num">56</td><td class="q">重曹（炭酸水素ナトリウム）を加熱すると？</td><td class="a"><strong>二酸化炭素</strong>発生</td></tr>
+        <tr><td class="num">57</td><td class="q">重曹水にBTBを入れると？</td><td class="a"><strong>青色</strong>（弱アルカリ性）</td></tr>
+      </table>
+    </div>
+
+    <!-- 12. ひっかけ -->
+    <div class="cat">
+      <div class="cat-title c-trap">⚠️ ひっかけポイント</div>
+      <table>
+        <tr><td class="num">58</td><td class="q">二酸化炭素は水上置換できる？</td><td class="a"><strong>できる</strong>（とけ方が弱いから水上でも下方でもOK）</td></tr>
+        <tr><td class="num">59</td><td class="q">「ポン」と音 → 何の気体？</td><td class="a"><strong>水素</strong>（火が消えるのは別物）</td></tr>
+      </table>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <span>🖨 A4 1枚で印刷OK</span>
+    <span>第28回 気体と化学反応 / 全59問</span>
+  </div>
+</div>
+
+</body>
+</html>
