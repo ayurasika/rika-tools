@@ -1110,7 +1110,7 @@
 <div class="tab-content active" id="tab-overview">
   <h2>📋 第28回 気体と化学反応 ぜんたい像</h2>
   <div class="overview-intro">
-    <strong>気体7種</strong>（酸素・二酸化炭素・水素・ちっ素・アンモニア・塩化水素・二酸化硫黄）の<strong>性質と作り方</strong>を覚えて、<strong>固体と液体を反応させる装置</strong>のしくみと、<strong>過不足のグラフ計算</strong>ができるようになる単元。<br>
+    <strong>気体6種</strong>（酸素・二酸化炭素・水素・ちっ素・アンモニア・塩化水素）の<strong>性質と作り方</strong>を覚えて、<strong>固体と液体を反応させる装置</strong>のしくみと、<strong>過不足のグラフ計算</strong>ができるようになる単元。<br>
     暗記＋計算＋読み取りの3つが全部出る、まさに<strong>総合力の単元</strong>！
   </div>
 
@@ -1128,7 +1128,7 @@
   <div class="group-section">
     <div class="group-title">A. 気体の性質と作り方（暗記の核）</div>
     <div class="group-list">
-      <span class="badge b-anki">暗記</span>Stage 1 / 2 / 3 — 気体7種の表、作り方の組み合わせ、識別方法
+      <span class="badge b-anki">暗記</span>Stage 1 / 2 / 3 — 気体6種の表、作り方の組み合わせ、識別方法
     </div>
   </div>
   <div class="group-section">
@@ -1180,7 +1180,7 @@
       <li><strong>塩化水素</strong>：下方置換、刺激臭、酸性、空気の1.3倍</li>
       <li><strong>ちっ素</strong>：空気中に約78%、無色無臭、燃えない</li>
       <li>水上置換は<strong>水にとけにくい</strong>気体（酸素・水素・ちっ素・一酸化炭素）</li>
-      <li>下方置換は<strong>水にとけて空気より重い</strong>（二酸化炭素・塩化水素・二酸化硫黄）</li>
+      <li>下方置換は<strong>水にとけて空気より重い</strong>（二酸化炭素・塩化水素）</li>
       <li>上方置換は<strong>水にとけて空気より軽い</strong>（アンモニアだけ！）</li>
       <li>ふたまた試験管：<strong>くびれ側に固体</strong>、反対側に液体（傾けて止められる）</li>
       <li>三角フラスコのガラス管：<strong>ろうとに繋ぐ方は長く</strong>、もう一方は短く</li>
@@ -1277,8 +1277,8 @@ const STAGES = [
     id: 1, title: "気体の性質を当てる問題", badge: "anki",
     summary: "🎯 出題：「次の気体の性質は？」「ある気体は〇〇な性質。何の気体？」",
     points: [
-      "<strong>STEP 1</strong>：まず<strong>においの有無</strong>で2グループに分ける（あり = アン・塩・二硫／なし = 酸・炭・水・ちっ）",
-      "<strong>STEP 2</strong>：次に<strong>空気との重さ</strong>で絞る（軽い = アンモニア・水素／重い = 塩化水素・二酸化炭素・二酸化硫黄）",
+      "<strong>STEP 1</strong>：まず<strong>においの有無</strong>で2グループに分ける（あり = アンモニア・塩化水素／なし = 酸素・二酸化炭素・水素・ちっ素）",
+      "<strong>STEP 2</strong>：次に<strong>空気との重さ</strong>で絞る（軽い = アンモニア・水素／重い = 塩化水素・二酸化炭素）",
       "<strong>STEP 3</strong>：最後に<strong>水へのとけ方</strong>で確定（とけにくい/とける/非常にとける）",
       "💡 ひっかけ：「鼻で確認」と書いてあったら<strong>刺激臭系</strong>を疑う"
     ],
@@ -1300,7 +1300,7 @@ const STAGES = [
     summary: "🎯 出題：「次の実験結果から気体A〜Fは何？」を消去法で解く",
     points: [
       "<strong>STEP 1</strong>：<strong>燃え方</strong>で絞る（ポン＝水素／激しく燃える＝酸素／燃えない＋無臭＝ちっ素）",
-      "<strong>STEP 2</strong>：<strong>リトマス紙</strong>で酸/アルカリ判定（赤→青＝アンモニア／青→赤＝塩化水素・二酸化硫黄）",
+      "<strong>STEP 2</strong>：<strong>リトマス紙</strong>で酸/アルカリ判定（赤→青＝アンモニア／青→赤＝塩化水素）",
       "<strong>STEP 3</strong>：<strong>石灰水</strong>は二酸化炭素の確認専用（白くにごる）",
       "<strong>STEP 4</strong>：複数の情報をかけ合わせて<strong>消去法</strong>で1つに絞る",
       "💡 ちっ素は「燃えない＋無臭＋無色＋無反応」だけが特徴"
@@ -1396,7 +1396,7 @@ const STAGES = [
 // ========= ANKI CARDS =========
 const ANKI = [
   {
-    q: "🔥 気体7種の性質まとめ表",
+    q: "🔥 気体6種の性質まとめ表",
     a: `<div style="font-size:0.78em; color:#5a7a7a; margin-bottom:6px;">👁 各セルをタップ／ホバーで答えが浮き出るよ</div>
     <table>
       <tr><th>気体</th><th>におい</th><th>重さ</th><th>水とけ</th><th>集め方</th></tr>
@@ -1407,7 +1407,7 @@ const ANKI = [
       <tr><td>アンモニア</td><td class="hide">あり</td><td class="hide">0.6倍</td><td class="hide">非常によくとける</td><td class="hide">上方</td></tr>
       <tr><td>塩化水素</td><td class="hide">あり</td><td class="hide">1.3倍</td><td class="hide">非常にとける</td><td class="hide">下方</td></tr>
     </table>
-    <div class="tip-box"><div class="ftitle">💡 覚え方</div>においがあるのは「アン・塩・二硫」（アンモニア・塩化水素・二酸化硫黄）。空気より軽いのはアンモニアと水素だけ。</div>`
+    <div class="tip-box"><div class="ftitle">💡 覚え方</div>においがあるのは「アンモニア・塩化水素」の2つ。空気より軽いのは「アンモニア・水素」の2つ。</div>`
   },
   {
     q: "⚗️ 気体の作り方の組み合わせ",
@@ -1439,7 +1439,7 @@ const ANKI = [
       <tr><td>線香が激しく燃える</td><td class="hide">酸素</td></tr>
       <tr><td>石灰水が白くにごる</td><td class="hide">二酸化炭素</td></tr>
       <tr><td>赤リトマス→青</td><td class="hide">アンモニア（アルカリ）</td></tr>
-      <tr><td>青リトマス→赤</td><td class="hide">塩化水素・二酸化硫黄（酸性）</td></tr>
+      <tr><td>青リトマス→赤</td><td class="hide">塩化水素（酸性）</td></tr>
       <tr><td>燃えず・におい無し・無色</td><td class="hide">ちっ素</td></tr>
     </table>
     <div class="warn-box"><div class="ftitle">⚠️ ちっ素は</div>「燃えない＋におい無し＋色なし」だけが特徴。ちっ素はほぼ何も反応しない！</div>`
@@ -1501,8 +1501,8 @@ const QUIZZES = [
   { cat: "作り方", q: "塩酸と反応して水素が出ない金属は？", opts: ["アルミニウム", "鉄", "銅", "亜鉛"], correct: 2, exp: "銅は塩酸とも水酸化ナトリウム水溶液とも反応しない。例外として必ず覚える。" },
   { cat: "識別", q: "石灰水を白くにごらせる気体は？", opts: ["酸素", "水素", "二酸化炭素", "アンモニア"], correct: 2, exp: "二酸化炭素＋石灰水（水酸化カルシウム水溶液）→ 炭酸カルシウムが沈殿して白くにごる。代表的な確認実験。" },
   { cat: "識別", q: "火を近づけてポンと音がしたら？", opts: ["酸素", "水素", "二酸化炭素", "ちっ素"], correct: 1, exp: "水素＋酸素＝水（爆発的反応）。青白い炎を出して燃え、ポンと音がする。" },
-  { cat: "識別", q: "赤リトマス紙が青に変わる気体は？", opts: ["塩化水素", "二酸化硫黄", "アンモニア", "二酸化炭素"], correct: 2, exp: "アルカリ性＝赤→青。アンモニアだけがアルカリ性の気体。塩化水素・二酸化炭素・二酸化硫黄は酸性。" },
-  { cat: "集め方", q: "水上置換で集めるべき気体は？", opts: ["アンモニア", "塩化水素", "酸素", "二酸化硫黄"], correct: 2, exp: "水上置換は『水にとけにくい』気体。酸素・水素・ちっ素・一酸化炭素が代表。アンモニア・塩化水素・二酸化硫黄はとける。" },
+  { cat: "識別", q: "赤リトマス紙が青に変わる気体は？", opts: ["塩化水素", "ちっ素", "アンモニア", "二酸化炭素"], correct: 2, exp: "アルカリ性＝赤→青。アンモニアだけがアルカリ性の気体。塩化水素・二酸化炭素は酸性、ちっ素は中性。" },
+  { cat: "集め方", q: "水上置換で集められない気体は？", opts: ["酸素", "水素", "アンモニア", "ちっ素"], correct: 2, exp: "アンモニアは水に非常によくとけるから水上ではダメ。空気より軽いので上方置換で集める。酸素・水素・ちっ素は水にとけにくいので水上置換でOK。" },
   { cat: "集め方", q: "水上置換のメリットを2つ選ぶなら？", opts: ["気体が水にとける／純粋に集まる", "純粋に集まる／量が見える", "空気と混ざる／量が見える", "速く集まる／空気と混ざる"], correct: 1, exp: "水上のメリットは『純粋に集まる』『集めた量が目で見える』『空気と混ざらない』の3つ。" },
   { cat: "装置", q: "ふたまた試験管はどっちに固体を入れる？", opts: ["くびれのある側", "くびれのない側", "どちらでもよい", "中央"], correct: 0, exp: "固体は<strong>くびれ側</strong>。反応を止めたいときくびれ側に液体を戻すと、くびれが固体を止めて分離できる。" },
   { cat: "装置", q: "三角フラスコのろうと側のガラス管は？", opts: ["短くする", "長くする", "どちらでもよい", "斜めにする"], correct: 1, exp: "ろうと側を<strong>長く</strong>する。気体がろうとに逆流するのを防ぐため。もう一方は液面より上で短くする。" },
@@ -1540,7 +1540,7 @@ const BOSS = [
 // ========= SCHEDULE =========
 const SCHEDULE = [
   {
-    title: "Day 1：全体像＋気体7種をつかむ",
+    title: "Day 1：全体像＋気体6種をつかむ",
     time: "約45分",
     steps: [
       { title: "STEP 1：全体像タブを最初から最後まで読む（10分）",
@@ -1548,10 +1548,10 @@ const SCHEDULE = [
           { tag: "read", text: "📋『全体像』タブを開いて、ぜんたいのボリューム＆大分類を確認" },
           { tag: "ankimi", text: "🔥『必ず暗記するもの』を声に出して読む（13個）" }
         ]},
-      { title: "STEP 2：気体7種の性質をインプット（20分）",
+      { title: "STEP 2：気体6種の性質をインプット（20分）",
         tasks: [
           { tag: "read", text: "🗺️ <strong>まず</strong>Stage 1『気体の性質を当てる問題』を読む（解き方の型を知る）" },
-          { tag: "ankimi", text: "📖→✋ 暗記カード『気体7種の性質まとめ表』を<strong>覚える</strong>（タップで隠して→自分で言う→「覚えた！」ボタン）" },
+          { tag: "ankimi", text: "📖→✋ 暗記カード『気体6種の性質まとめ表』を<strong>覚える</strong>（タップで隠して→自分で言う→「覚えた！」ボタン）" },
           { tag: "write", text: "✍️ ノートに性質表を写す（色・におい・重さ・とけ方・集め方）" }
         ]},
       { title: "STEP 3：作り方＋識別を確認（15分）",
@@ -1569,7 +1569,7 @@ const SCHEDULE = [
     steps: [
       { title: "STEP 1：前日復習（5分）",
         tasks: [
-          { tag: "review", text: "🔁 暗記カード『気体7種』『作り方』を見直し" }
+          { tag: "review", text: "🔁 暗記カード『気体6種』『作り方』を見直し" }
         ]},
       { title: "STEP 2：装置と集め方（20分）",
         tasks: [
@@ -1618,7 +1618,7 @@ const SCHEDULE = [
       { title: "STEP 1：暗記の最終確認（15分）",
         tasks: [
           { tag: "ankimi", text: "🔥 暗記カード全8枚を通しで確認（まだ『覚えた！』してないカードがあれば<strong>全部押す</strong>）" },
-          { tag: "write", text: "✍️ 何も見ずに『気体7種の性質表』を書いてみる（書けないところが本当の弱点）" }
+          { tag: "write", text: "✍️ 何も見ずに『気体6種の性質表』を書いてみる（書けないところが本当の弱点）" }
         ]},
       { title: "STEP 2：識別＆応用（15分）",
         tasks: [
